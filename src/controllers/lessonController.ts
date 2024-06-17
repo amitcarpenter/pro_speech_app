@@ -25,7 +25,7 @@ export const createLesson = async (req: Request, res: Response) => {
         const lessonsData = req.body;
         const savedLessons = [];
         for (const lessonData of lessonsData) {
-            const { lesson_name, module_id} = lessonData;
+            const { lesson_name, module_id } = lessonData;
             const newLesson = new Lesson({
                 lesson_name,
                 module_id,
@@ -130,5 +130,42 @@ export const deleteLessonById = async (req: Request, res: Response) => {
         });
     } catch (error: any) {
         return res.status(500).json({ success: false, status: 500, error: error.message });
+    }
+};
+
+
+// Get Lesson by section id
+export const getLessonByModuleId = async (req: Request, res: Response) => {
+    try {
+        const moduleId = req.params.id;
+        console.log(moduleId)
+        const lessons = await Lesson.find({ module_id: moduleId });
+
+        if (!lessons.length) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: 'No lesson found for the given module ID.',
+            });
+        }
+
+        // lessons.forEach(lesson => {
+        //     if (lesson.module_image) {
+        //         module.module_image = APP_URL + module.module_image;
+        //     }
+        // });
+
+        return res.status(200).json({
+            success: true,
+            status: 200,
+            data: lessons,
+        });
+    } catch (error: any) {
+        console.error('Error fetching lessons by module ID:', error);
+        return res.status(500).json({
+            success: false,
+            status: 500,
+            message: error.message,
+        });
     }
 };

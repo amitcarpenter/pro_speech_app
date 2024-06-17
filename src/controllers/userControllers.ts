@@ -574,7 +574,9 @@ export const remove_profile_image = async (req: Request, res: Response) => {
 export const signup_google = async (req: Request, res: Response) => {
   const signupGoogleSchema = Joi.object({
     email: Joi.string().email().required(),
-    googleId: Joi.string().required()
+    googleId: Joi.string().required(),
+    name: Joi.string().optional(),
+    profileImage: Joi.string().optional()
   });
 
   const { error } = signupGoogleSchema.validate(req.body);
@@ -586,7 +588,7 @@ export const signup_google = async (req: Request, res: Response) => {
     });
   }
 
-  const { email, googleId } = req.body;
+  const { email, googleId, name, profileImage } = req.body;
 
   try {
 
@@ -594,8 +596,11 @@ export const signup_google = async (req: Request, res: Response) => {
 
 
     if (user) {
+      user.name = name
       user.googleId = googleId;
       user.signupMethod = 'google';
+      user.profile.profileImage = profileImage
+      user.isVerified = true
     } else {
       user = new User({
         email,
@@ -632,7 +637,9 @@ export const signup_google = async (req: Request, res: Response) => {
 export const signup_facebook = async (req: Request, res: Response) => {
   const signupFacebookSchema = Joi.object({
     email: Joi.string().email().required(),
-    facebookId: Joi.string().required()
+    facebookId: Joi.string().required(),
+    name: Joi.string().optional(),
+    profileImage: Joi.string().optional(),
   });
 
   const { error } = signupFacebookSchema.validate(req.body);
@@ -644,13 +651,16 @@ export const signup_facebook = async (req: Request, res: Response) => {
     });
   }
 
-  const { email, facebookId } = req.body;
+  const { email, facebookId, name, profileImage } = req.body;
 
   try {
     let user = await User.findOne({ email });
     if (user) {
       user.facebookId = facebookId;
       user.signupMethod = 'facebook';
+      user.name = name;
+      user.profile.profileImage = profileImage
+      user.isVerified = true
     } else {
       user = new User({
         email,
