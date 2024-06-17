@@ -22,7 +22,7 @@ import {
 
 
 import { authenticateUser } from "../middlewares/auth";
-import {uploadImage} from "../services/uploadImage"
+import { uploadProfileImage } from "../services/uploadImage"
 
 
 const router = Router();
@@ -33,8 +33,8 @@ router.post('/login', login);
 
 router.post('/resend-otp', resendOTPByEmail);
 
-router.post('/signup/google',signup_google)
-router.post('/signup/facebook',signup_facebook)
+router.post('/signup/google', signup_google)
+router.post('/signup/facebook', signup_facebook)
 
 // router.get('/google', googleAuthController);
 // router.get('/google/callback', googleAuthCallbackController);
@@ -43,9 +43,9 @@ router.post('/signup/facebook',signup_facebook)
 // router.get('/facebook/callback', facebookAuthCallbackController);
 
 router.get('/profile', authenticateUser, getProfile);
-router.put('/profile', uploadImage, authenticateUser, updateProfile);
+router.put('/profile', uploadProfileImage, authenticateUser, updateProfile);
 
-router.post('/profileImage/update', uploadImage, authenticateUser, profile_image_update);
+router.post('/profileImage/update', uploadProfileImage, authenticateUser, profile_image_update);
 router.delete('/profileImage/delete', authenticateUser, remove_profile_image);
 
 router.post('/forgot-password', forgotPassword);

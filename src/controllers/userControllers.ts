@@ -613,7 +613,7 @@ export const signup_google = async (req: Request, res: Response) => {
 
 
     await user.save();
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       status: 201,
       message: 'User registered successfully via Google',

@@ -4,14 +4,22 @@ import {
   getAllModules,
   getModuleById,
   updateModuleById,
-  deleteModuleById
+  deleteModuleById,
+  getModuleBySectionId,
 } from '../controllers/moduleController';
+
+import { uploadModuleImage } from "../services/uploadImage"
+import { authenticateUser } from "../middlewares/auth";
+
 
 const router = express.Router();
 
-router.post('/', createModule);
-router.get('/', getAllModules);
+router.post('/', uploadModuleImage, createModule);
+router.get('/', authenticateUser, getAllModules);
 router.get('/:id', getModuleById);
+
+router.get('/section-id/:id', authenticateUser, getModuleBySectionId);
+
 router.put('/:id', updateModuleById);
 router.delete('/:id', deleteModuleById);
 

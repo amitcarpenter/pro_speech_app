@@ -8,8 +8,8 @@ export const createLesson = async (req: Request, res: Response) => {
         const lessonSchema = Joi.object({
             lesson_name: Joi.string().required(),
             module_id: Joi.string().required(),
-            quiz_ids: Joi.string().required(), 
-            lesstionDetailsId: Joi.string().required(),  
+            // quiz_ids: Joi.string().optional(), 
+            // lesstionDetailsId: Joi.string().optional(),  
         });
 
         const lessonsSchema = Joi.array().items(lessonSchema);
@@ -25,12 +25,12 @@ export const createLesson = async (req: Request, res: Response) => {
         const lessonsData = req.body;
         const savedLessons = [];
         for (const lessonData of lessonsData) {
-            const { lesson_name, module_id, quiz_ids, lesstionDetailsId } = lessonData;
+            const { lesson_name, module_id} = lessonData;
             const newLesson = new Lesson({
                 lesson_name,
                 module_id,
-                quiz_ids,
-                lesstionDetailsId
+                // quiz_ids,
+                // lesstionDetailsId
             });
             const savedLesson = await newLesson.save();
             savedLessons.push(savedLesson);
