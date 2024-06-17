@@ -3,6 +3,7 @@ import Joi from 'joi';
 import mongoose, { Types } from 'mongoose';
 import Module, { IModule } from '../models/Module';
 import Lesson from '../models/Lesson';
+import Section from '../models/Section';
 
 const APP_URL = process.env.APP_URL as string
 
@@ -38,7 +39,15 @@ export const createModule = async (req: Request, res: Response) => {
 
         });
         const savedModule = await newModule.save();
+        const updatedSection = await Section.findByIdAndUpdate(
+            section_id,
+            { $push: { modules: savedModule._id } }, 
+            { new: true }
+        );
 
+        if (!updatedSection) {
+            throw new Error('Section not found or could not be updated.');
+        }
         return res.status(201).json({
             success: true,
             status: 201,
@@ -149,7 +158,7 @@ export const getModuleBySectionId = async (req: Request, res: Response) => {
 
         const modulesWithLessonCount = await Promise.all(modules.map(async (module) => {
             const lessonCount = await Lesson.countDocuments({ module_id: module._id });
-            const moduleWithLessonCount = module.toObject(); 
+            const moduleWithLessonCount = module.toObject();
             moduleWithLessonCount.lesson_count = lessonCount;
 
             if (moduleWithLessonCount.module_image) {

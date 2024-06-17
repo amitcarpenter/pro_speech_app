@@ -193,52 +193,9 @@ interface ILesson {
     question_count: number;
 }
 
-// export const getSections = async (req: Request, res: Response) => {
-//     try {
-//         const sections = await Section.find().populate('modules');
-//         const user_req = req.user as IUser;
-//         const user = await User.findById(user_req.id);
-//         const completedLessons = user?.completed_lessons.map(id => new Types.ObjectId(id)) ?? [];
-
-//         if (!sections) {
-//             return res.status(400).json({ success: false, status: 400, message: "Sections not found" });
-//         }
-//         const sectionsWithCompletion = await Promise.all(sections.map(async (section) => {
-//             const moduleIds = section.modules.map((module: { _id: Types.ObjectId }) => module._id);
-//             const lessons = await Lesson.find({ module_id: { $in: moduleIds } }) as ILesson[];
-//             const totalLessons = lessons.length;
-
-//             console.log(totalLessons)
-//             const completedLessonsInSection = lessons.filter((lesson: ILesson) => completedLessons.includes(lesson._id)).length;
-//             console.log(completedLessonsInSection)
-
-//             // Calculate completion percentage
-//             const completionPercentage = totalLessons > 0 ? (completedLessonsInSection / totalLessons) * 100 : 0;
-
-//             // Format section image URL
-//             if (section.section_image) {
-//                 section.section_image = APP_URL + section.section_image;
-//             }
-
-//             return {
-//                 ...section.toObject(),
-//                 completionPercentage: completionPercentage.toFixed(2)
-//             };
-//         }));
-
-//         return res.status(200).json({
-//             success: true,
-//             status: 200,
-//             data: sectionsWithCompletion,
-//         });
-//     } catch (error: any) {
-//         console.error('Error fetching sections:', error);
-//         return res.status(500).json({ success: false, status: 500, error: error.message });
-//     }
-// };
 
 
-
+// Get All Section 
 export const getSections = async (req: Request, res: Response) => {
     try {
         const sections = await Section.find().populate('modules');
@@ -250,9 +207,7 @@ export const getSections = async (req: Request, res: Response) => {
             return res.status(400).json({ success: false, status: 400, message: "Sections not found" });
         }
 
-        // Loop through each section to calculate completion percentage
         const sectionsWithCompletion = await Promise.all(sections.map(async (section) => {
-            // Fetch all modules and lessons related to this section
             const moduleIds = section.modules.map((module: { _id: Types.ObjectId }) => module._id);
             const lessons = await Lesson.find({ module_id: { $in: moduleIds } }) as ILesson[];
             const totalLessons = lessons.length;
