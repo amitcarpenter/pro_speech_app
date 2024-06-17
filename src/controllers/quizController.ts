@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import Joi from 'joi';
-
+import User, { IUser } from '../models/User';
 import Quiz from '../models/Quiz';
+import Lesson from '../models/Lesson';
+import Score from '../models/Score';
 
 // Create a new quiz
 export const createQuiz = async (req: Request, res: Response) => {
@@ -167,41 +169,11 @@ export const deleteQuizById = async (req: Request, res: Response) => {
 };
 
 // Check currect answer
-// export const check_quiz = async (req: Request, res: Response) => {
-//     try {
-//         const { questionId, selectedOption } = req.body;
-//         const quiz = await Quiz.findOne({ "questions._id": questionId });
-//         console.log(quiz)
-
-//         if (!quiz) {
-//             return res.status(404).json({ message: 'Question not found' });
-//         }
-
-//         const question = quiz.questions
-
-//         if (!question) {
-//             return res.status(404).json({ message: 'Question not found' });
-//         }
-
-//         // const isCorrect = question.correctOption === selectedAnswer;
-
-//         return res.json({ question });
-//         // return res.json({ isCorrect, correctAnswer: question.correctOption });
-//     } catch (error: any) {
-//         return res.status(500).json({
-//             success: false,
-//             status: 500,
-//             error: error.message,
-//         });
-//     }
-// };
-
-
 export const check_quiz = async (req: Request, res: Response) => {
     try {
         const { questionId, selectedOption } = req.body;
         const quiz = await Quiz.findOne({ "questions._id": questionId });
-        
+
         if (!quiz) {
             return res.status(404).json({ message: 'Question not found' });
         }
@@ -220,3 +192,96 @@ export const check_quiz = async (req: Request, res: Response) => {
         });
     }
 };
+
+
+// Get Quiz by lesson id
+export const getQuizByLessonId = async (req: Request, res: Response) => {
+    try {
+        const lessonId = req.params.id;
+        console.log(lessonId)
+        const quiz = await Quiz.find({ lesson_id: lessonId });
+
+        if (!quiz.length) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: 'No quiz found for the given lesson ID.',
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            status: 200,
+            data: quiz,
+        });
+    } catch (error: any) {
+        return res.status(500).json({
+            success: false,
+            status: 500,
+            message: error.message,
+        });
+    }
+};
+
+// sumit quiz controller
+export const submit_quiz = async (req: Request, res: Response) => {
+    try {
+        const submitQuizScehma = Joi.object({
+            score: Joi.string().required(),
+            quizId: Joi.string().required()
+        })
+
+        const { error } = submitQuizScehma.validate(req.body)
+        if (error) {
+            return res.status(400).json({
+                success: false,
+                status: 400,
+                message: error.message
+            })
+        }
+
+        const { score, quizId } = req.body;
+
+        const user_req = req.user as IUser
+        const user = await User.findById(user_req.id);
+        const quiz = await Quiz.findOne({ _id: quizId })
+
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                status: 400, message: "user not found"
+            })
+        }
+        if (!quiz) {
+            return res.status(400).json({
+                success: false,
+                status: 400, message: "quiz not found"
+            })
+        }
+        
+        user.completed_lessons.push(quiz.lesson_id)
+        const newScore = new Score({
+            score_number: score,
+            quizId: quizId,
+            lessonId: quiz?.lesson_id,
+            userId: user._id
+        })
+
+        const savedScore = await newScore.save()
+        const savedUser = await user.save()
+        return res.status(200).json({
+            success: true,
+            status: 200, savedScore, savedUser
+        })
+
+
+
+    } catch (error: any) {
+        return res.status(500).json({
+            success: false,
+            status: 500,
+            message: error.message,
+        });
+    }
+}

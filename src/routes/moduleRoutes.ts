@@ -14,13 +14,13 @@ import { authenticateUser } from "../middlewares/auth";
 
 const router = express.Router();
 
-router.post('/', uploadModuleImage, createModule);
-router.get('/', authenticateUser, getAllModules);
-router.get('/:id', getModuleById);
+router.post('/', authenticateUser, uploadModuleImage, createModule);
+router.get('/', authenticateUser, authenticateUser, getAllModules);
+router.get('/:id', authenticateUser, getModuleById);
 
 router.get('/section-id/:id', authenticateUser, getModuleBySectionId);
 
-router.put('/:id', updateModuleById);
-router.delete('/:id', deleteModuleById);
+router.put('/:id', authenticateUser, updateModuleById);
+router.delete('/:id', authenticateUser, deleteModuleById);
 
 export default router;

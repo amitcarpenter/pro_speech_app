@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import { Types } from 'mongoose';
 import Section from '../models/Section';
+import User, { IUser } from '../models/User';
 import Joi from 'joi';
+import { stat } from 'fs';
 
 const APP_URL = process.env.APP_URL as string
 
@@ -43,12 +45,20 @@ export const createSection = async (req: Request, res: Response) => {
 export const getSections = async (req: Request, res: Response) => {
     try {
         const sections = await Section.find()
-        console.log(sections)
+        const user_req = req.user as IUser
+        const user = await User.findById(user_req.id);
+
+        if (!sections) {
+            return res.status(400).json({ success: false, status: 400, message: "sections not found" })
+        }
+
         for (let section of sections) {
             if (section.section_image) {
                 section.section_image = APP_URL + section.section_image
             }
         }
+
+        // let score = 
 
         return res.status(200).json({
             success: true,

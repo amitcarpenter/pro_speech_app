@@ -6,10 +6,14 @@ import { authenticateUser } from "../middlewares/auth";
 
 const router = Router();
 
-router.post('/', uploadSectionImage, createSection);
+router.post('/', authenticateUser, uploadSectionImage, createSection);
+
 router.get('/', authenticateUser, getSections);
-router.get('/:id', getSectionById);
-router.put('/:id', updateSection);
-router.delete('/:id', deleteSection);
+
+router.get('/:id', authenticateUser, getSectionById);
+
+router.put('/:id', authenticateUser, updateSection);
+
+router.delete('/:id', authenticateUser, deleteSection);
 
 export default router;
