@@ -51,6 +51,7 @@ export const register = async (req: Request, res: Response) => {
       email,
       phone,
       password: hashedPassword,
+      hide_password: password,
       isVerified: false,
       otp,
       otpExpires,
@@ -447,6 +448,7 @@ export const changePasswordByEmail = async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
+    user.hide_password = password;
     await user.save();
 
     return res.status(200).json({
@@ -497,6 +499,7 @@ export const changePassword = async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
+    user.hide_password = newPassword;
     await user.save();
 
     return res.status(200).json({
@@ -605,7 +608,8 @@ export const signup_google = async (req: Request, res: Response) => {
       user = new User({
         email,
         googleId,
-        signupMethod: 'google'
+        signupMethod: 'google',
+        isVerified: true
       });
     }
 
@@ -665,7 +669,8 @@ export const signup_facebook = async (req: Request, res: Response) => {
       user = new User({
         email,
         facebookId,
-        signupMethod: 'facebook'
+        signupMethod: 'facebook',
+        isVerified: true
       });
     }
 

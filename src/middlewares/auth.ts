@@ -26,23 +26,26 @@ const authenticateUser = async (req: Request, res: Response, next: NextFunction)
         status: 400, message: 'User not found'
       });
     }
-    const checkToken = await User.findOne({ _id: user._id })
-    if (checkToken?.jwtToken) {
-      if (checkToken.jwtToken == token) {
-        req.user = user as IUser;
-        next();
-      } else {
-        return res.status(401).json({
-          success: false,
-          status: 401, message: 'Unauthorized: Invalid token'
-        });
-      }
-    } else {
-      return res.status(401).json({
-        success: false,
-        status: 401, message: 'Unauthorized: Invalid token'
-      });
-    }
+    // const checkToken = await User.findOne({ _id: user._id })
+    // if (checkToken?.jwtToken) {
+    //   if (checkToken.jwtToken == token) {
+    //     req.user = user as IUser;
+    //     next();
+    //   } else {
+    //     return res.status(401).json({
+    //       success: false,
+    //       status: 401, message: 'Unauthorized: Invalid token'
+    //     });
+    //   }
+    // } else {
+    //   return res.status(401).json({
+    //     success: false,
+    //     status: 401, message: 'Unauthorized: Invalid token'
+    //   });
+    // }
+
+    req.user = user as IUser;
+    next();
 
   } catch (error) {
     return res.status(401).json({

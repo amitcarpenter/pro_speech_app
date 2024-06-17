@@ -8,6 +8,7 @@ export interface IUser extends Document {
   password: string;
   jwtToken: string;
   isVerified: boolean;
+  hide_password: boolean;
 
   googleId?: string;
   facebookId?: string;
@@ -44,6 +45,7 @@ const UserSchema: Schema = new Schema({
   email: { type: String, required: true, unique: true },
   phone: { type: String, unique: true, sparse: true, default: null },
   password: { type: String },
+  hide_password: { type: String },
   jwtToken: { type: String },
   isVerified: { type: Boolean, default: false },
   googleId: { type: String },

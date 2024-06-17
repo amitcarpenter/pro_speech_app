@@ -131,47 +131,8 @@ export const deleteModuleById = async (req: Request, res: Response) => {
     }
 };
 
+
 // Get Module by section id
-// export const getModuleBySectionId = async (req: Request, res: Response) => {
-//     try {
-//         const sectionId = req.params.id;
-//         console.log(sectionId)
-//         const modules = await Module.find({ section_id: sectionId });
-
-//         modules.forEach((module) => {
-//             const lesson = await Lesson.find({ module_id: module._id })
-
-//         })
-
-//         if (!modules.length) {
-//             return res.status(404).json({
-//                 success: false,
-//                 status: 404,
-//                 message: 'No modules found for the given section ID.',
-//             });
-//         }
-
-//         modules.forEach(module => {
-//             if (module.module_image) {
-//                 module.module_image = APP_URL + module.module_image;
-//             }
-//         });
-
-//         return res.status(200).json({
-//             success: true,
-//             status: 200,
-//             data: modules,
-//         });
-//     } catch (error: any) {
-//         console.error('Error fetching modules by section ID:', error);
-//         return res.status(500).json({
-//             success: false,
-//             status: 500,
-//             message: error.message,
-//         });
-//     }
-// };
-
 export const getModuleBySectionId = async (req: Request, res: Response) => {
     try {
         const sectionId = req.params.id;
@@ -186,7 +147,6 @@ export const getModuleBySectionId = async (req: Request, res: Response) => {
             });
         }
 
-        // Using Promise.all to handle asynchronous operations inside the loop
         const modulesWithLessonCount = await Promise.all(modules.map(async (module) => {
             const lessonCount = await Lesson.countDocuments({ module_id: module._id });
             const moduleWithLessonCount = module.toObject(); 

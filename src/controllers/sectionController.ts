@@ -47,6 +47,9 @@ export const getSections = async (req: Request, res: Response) => {
         const sections = await Section.find()
         const user_req = req.user as IUser
         const user = await User.findById(user_req.id);
+        const lesson_ids = user?.completed_lessons
+        console.log(lesson_ids)
+        console.log(lesson_ids?.length)
 
         if (!sections) {
             return res.status(400).json({ success: false, status: 400, message: "sections not found" })
@@ -58,7 +61,7 @@ export const getSections = async (req: Request, res: Response) => {
             }
         }
 
-        // let score = 
+
 
         return res.status(200).json({
             success: true,

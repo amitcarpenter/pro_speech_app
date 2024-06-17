@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Joi from 'joi';
 import Lesson from '../models/Lesson';
+import Quiz from '../models/Quiz';
 
 // // Create a new lesson
 export const createLesson = async (req: Request, res: Response) => {
@@ -138,7 +139,7 @@ export const deleteLessonById = async (req: Request, res: Response) => {
 export const getLessonByModuleId = async (req: Request, res: Response) => {
     try {
         const moduleId = req.params.id;
-        console.log(moduleId)
+        console.log(moduleId);
         const lessons = await Lesson.find({ module_id: moduleId });
 
         if (!lessons.length) {
@@ -149,16 +150,21 @@ export const getLessonByModuleId = async (req: Request, res: Response) => {
             });
         }
 
-        // lessons.forEach(lesson => {
-        //     if (lesson.module_image) {
-        //         module.module_image = APP_URL + module.module_image;
-        //     }
-        // });
+        // Using Promise.all to handle asynchronous operations inside the loop
+        const lessonsWithQuizCount = await Promise.all(lessons.map(async (lesson) => {
+            const quizzes = await Quiz.find({ lesson_id: lesson._id });
+            const questionCount = quizzes.reduce((count, quiz) => count + quiz.questions.length, 0);
+
+            // Update the lesson's question_count field
+            lesson.question_count = questionCount;
+            await lesson.save(); 
+            return lesson.toObject();
+        }));
 
         return res.status(200).json({
             success: true,
             status: 200,
-            data: lessons,
+            data: lessonsWithQuizCount,
         });
     } catch (error: any) {
         console.error('Error fetching lessons by module ID:', error);
