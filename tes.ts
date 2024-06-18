@@ -19,7 +19,7 @@ app.get('/quiz/:id', async (req, res) => {
     } catch (error) {
         res.status(500).send('Error fetching quiz info');
     }
-});
+}); 
 
 app.get('/quiz-result/:id', async (req, res) => {
     try {
