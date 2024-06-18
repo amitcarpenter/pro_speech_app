@@ -9,6 +9,8 @@ import moduleRoutes from "../routes/moduleRoutes";
 import sectionRoutes from "../routes/sectionRoutes";
 import scoreRoutes from "../routes/scoreRoutes";
 import lessonDetailsRoutes from "../routes/lessonDetailsRoutes";
+import privacyPolicyRouters from "../routes//privacyPolicyRoutes";
+import termsAndConditionsRoutes from "../routes/termsAndConditionsRoutes";
 
 
 const configureApp = (app: Application): void => {
@@ -22,6 +24,9 @@ const configureApp = (app: Application): void => {
   app.use('/api/sections', sectionRoutes);
   app.use('/api/scores', scoreRoutes);
   app.use('/api/lessonDetails', lessonDetailsRoutes);
+  app.use('/api/privacy-policy', privacyPolicyRouters);
+  app.use('/api/terms-and-conditions', termsAndConditionsRoutes);
+
 };
 
 
