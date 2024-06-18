@@ -290,7 +290,8 @@ export const submit_quiz = async (req: Request, res: Response) => {
     try {
         const submitQuizSchema = Joi.object({
             score: Joi.string().required(),
-            quizId: Joi.string().required()
+            quizId: Joi.string().required(),
+            question_count: Joi.string().required()
         });
 
         const { error } = submitQuizSchema.validate(req.body);
@@ -302,7 +303,7 @@ export const submit_quiz = async (req: Request, res: Response) => {
             });
         }
 
-        const { score, quizId } = req.body;
+        const { score, quizId, question_count } = req.body;
         const user_req = req.user as IUser;
         const user = await User.findById(user_req.id);
         const quiz = await Quiz.findOne({ _id: quizId });
@@ -310,7 +311,7 @@ export const submit_quiz = async (req: Request, res: Response) => {
         if (!user) {
             return res.status(400).json({
                 success: false,
-                status: 400, 
+                status: 400,
                 message: "User not found"
             });
         }
@@ -318,7 +319,7 @@ export const submit_quiz = async (req: Request, res: Response) => {
         if (!quiz) {
             return res.status(400).json({
                 success: false,
-                status: 400, 
+                status: 400,
                 message: "Quiz not found"
             });
         }
@@ -327,7 +328,7 @@ export const submit_quiz = async (req: Request, res: Response) => {
         if (user.completed_lessons.includes(quiz.lesson_id)) {
             return res.status(400).json({
                 success: false,
-                status: 400, 
+                status: 400,
                 message: "You have already submitted this lesson"
             });
         }
@@ -335,6 +336,7 @@ export const submit_quiz = async (req: Request, res: Response) => {
         user.completed_lessons.push(quiz.lesson_id);
         const newScore = new Score({
             score_number: score,
+            total_question: question_count,
             quizId: quizId,
             lessonId: quiz.lesson_id,
             userId: user._id
@@ -344,8 +346,8 @@ export const submit_quiz = async (req: Request, res: Response) => {
         const savedUser = await user.save();
         return res.status(200).json({
             success: true,
-            status: 200, 
-            savedScore, 
+            status: 200,
+            savedScore,
             savedUser
         });
     } catch (error: any) {
@@ -357,3 +359,4 @@ export const submit_quiz = async (req: Request, res: Response) => {
         });
     }
 };
+

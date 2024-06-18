@@ -7,6 +7,8 @@ import quizRoutes from "../routes/quizRoutes";
 import lessonRoutes from "../routes/lessonRoutes";
 import moduleRoutes from "../routes/moduleRoutes";
 import sectionRoutes from "../routes/sectionRoutes";
+import scoreRoutes from "../routes/scoreRoutes";
+import lessonDetailsRoutes from "../routes/lessonDetailsRoutes";
 
 
 const configureApp = (app: Application): void => {
@@ -18,6 +20,8 @@ const configureApp = (app: Application): void => {
   app.use('/api/lessons', lessonRoutes);
   app.use('/api/modules', moduleRoutes);
   app.use('/api/sections', sectionRoutes);
+  app.use('/api/scores', scoreRoutes);
+  app.use('/api/lessonDetails', lessonDetailsRoutes);
 };
 
 

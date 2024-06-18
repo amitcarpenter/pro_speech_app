@@ -1,29 +1,21 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
-interface IQuestion {
-  text: string;  
-  options: string[];
-  correctOption: string;
+interface ILessonDetail extends Document {
+  lesson_image: string;
+  lesson_video: string;
+  lesson_content: string;
+  lesson_voice: string;
+  lessonId: Types.ObjectId;
 }
 
-interface IQuiz extends Document {
-  quiz_name: string;
-  questions: IQuestion[];
-  lesson_id: Types.ObjectId;
-}
-
-const questionSchema = new Schema<IQuestion>({
-  text: { type: String, required: true },  
-  options: { type: [String], required: true },
-  correctOption: { type: String, required: true }
+const lessonDetailSchema = new Schema<ILessonDetail>({
+  lesson_image: { type: String, required: true },
+  lesson_video: { type: String, required: true },
+  lesson_content: { type: String, required: true },
+  lesson_voice: { type: String, required: true },
+  lessonId: { type: Schema.Types.ObjectId, ref: 'Lesson', required: true },
 });
 
-const quizSchema = new Schema<IQuiz>({
-  quiz_name: { type: String, required: true },
-  questions: { type: [questionSchema], required: true },
-  lesson_id: { type: Schema.Types.ObjectId, ref: 'LessionDetails', required: true }
-});
+const LessonDetail = model<ILessonDetail>('LessonDetail', lessonDetailSchema);
 
-const Quiz = model<IQuiz>('LessionDetails', quizSchema);
-
-export default Quiz;
+export default LessonDetail;
