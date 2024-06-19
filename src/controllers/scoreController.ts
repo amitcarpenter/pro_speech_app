@@ -6,6 +6,8 @@ import Lesson from '../models/Lesson';
 import Score from '../models/Score';
 
 // get score data 
+
+
 // export const get_score_leaderboard = async (req: Request, res: Response) => {
 //     try {
 //         const user_req = req.user as IUser;
@@ -19,7 +21,12 @@ import Score from '../models/Score';
 //             });
 //         }
 
-//         const scoreData = await Score.find({ userId: user._id });
+//         // Fetch score data with populated lesson details
+//         const scoreData = await Score.find({ userId: user._id }).populate({
+//             path: 'lessonId',
+//             select: 'lesson_name', // Select only the lesson name
+//         });
+
 //         if (!scoreData.length) {
 //             return res.status(404).json({
 //                 success: false,
@@ -35,11 +42,17 @@ import Score from '../models/Score';
 //         // Calculate the percentage score
 //         const percentage = totalQuestions > 0 ? (totalScores / totalQuestions) * 100 : 0;
 
+//         // Map score data to include lesson name
+//         const scoreDataWithLessonNames = scoreData.map(score => ({
+//             ...score.toObject(),
+//             lesson_name: (score.lessonId as any).lesson_name,
+//         }));
+
 //         return res.status(200).json({
 //             success: true,
 //             status: 200,
 //             data: {
-//                 scoreData,
+//                 scoreData: scoreDataWithLessonNames,
 //                 totalScores,
 //                 totalQuestions,
 //                 percentage: percentage.toFixed(2),
@@ -47,6 +60,7 @@ import Score from '../models/Score';
 //         });
 
 //     } catch (error: any) {
+//         console.error('Error fetching score leaderboard:', error);
 //         return res.status(500).json({
 //             success: false,
 //             status: 500,
@@ -54,6 +68,7 @@ import Score from '../models/Score';
 //         });
 //     }
 // };
+
 
 
 export const get_score_leaderboard = async (req: Request, res: Response) => {
@@ -72,7 +87,7 @@ export const get_score_leaderboard = async (req: Request, res: Response) => {
         // Fetch score data with populated lesson details
         const scoreData = await Score.find({ userId: user._id }).populate({
             path: 'lessonId',
-            select: 'lesson_name', // Select only the lesson name
+            select: 'lesson_name',
         });
 
         if (!scoreData.length) {
@@ -96,11 +111,14 @@ export const get_score_leaderboard = async (req: Request, res: Response) => {
             lesson_name: (score.lessonId as any).lesson_name,
         }));
 
+        // Sort the score data by score_number in descending order
+        const sortedScoreData = scoreDataWithLessonNames.sort((a, b) => b.score_number - a.score_number);
+
         return res.status(200).json({
             success: true,
             status: 200,
             data: {
-                scoreData: scoreDataWithLessonNames,
+                scoreData: sortedScoreData,
                 totalScores,
                 totalQuestions,
                 percentage: percentage.toFixed(2),
@@ -116,4 +134,3 @@ export const get_score_leaderboard = async (req: Request, res: Response) => {
         });
     }
 };
-
