@@ -593,35 +593,43 @@ export const signup_google = async (req: Request, res: Response) => {
 
   const { email, googleId, name, profileImage } = req.body;
 
-  try {
+  // const result = await User.collection.dropIndex('phone_1')
+  // console.log(result)
 
+  try {
     let user = await User.findOne({ email });
 
-
     if (user) {
-      user.name = name
+      user.name = name || user.name;
       user.googleId = googleId;
       user.signupMethod = 'google';
-      user.profile.profileImage = profileImage
-      user.isVerified = true
+      user.isVerified = true;
     } else {
       user = new User({
         email,
         googleId,
+        name,
         signupMethod: 'google',
-        isVerified: true
+        isVerified: true,
+        profile: {
+          fullName: name,
+          email: email,
+          profileImage: profileImage
+        },
       });
     }
 
+    // Generate JWT token
     const payload: { userId: string; email: string } = {
       userId: user._id as string,
       email: user.email
     };
     const token = generateAccessToken(payload);
-    user.jwtToken = token
+    user.jwtToken = token;
 
-
+    // Save user to the database
     await user.save();
+
     return res.status(201).json({
       success: true,
       status: 201,
@@ -629,7 +637,8 @@ export const signup_google = async (req: Request, res: Response) => {
       token
     });
   } catch (error: any) {
-    return res.status(500).send({
+    console.error('Error during Google signup:', error);
+    return res.status(500).json({
       success: false,
       status: 500,
       error: error.message
@@ -661,16 +670,18 @@ export const signup_facebook = async (req: Request, res: Response) => {
     let user = await User.findOne({ email });
     if (user) {
       user.facebookId = facebookId;
-      user.signupMethod = 'facebook';
-      user.name = name;
-      user.profile.profileImage = profileImage
       user.isVerified = true
     } else {
       user = new User({
         email,
         facebookId,
         signupMethod: 'facebook',
-        isVerified: true
+        isVerified: true,
+        profile: {
+          fullName: name,
+          email: email,
+          profileImage: profileImage
+        },
       });
     }
 
