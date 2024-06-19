@@ -56,6 +56,7 @@ export const register = async (req: Request, res: Response) => {
       otp,
       otpExpires,
       profile: {
+        fullName: name,
         email: email,
         phone: phone
       }
