@@ -246,11 +246,17 @@ export const getProfile = async (req: Request, res: Response) => {
       });
     }
 
-    if (user.profile.profileImage) {
-      user.profile.profileImage = APP_URL + user.profile.profileImage
-    } else {
-      user.profile.profileImage = null;
+    // if (user.profile.profileImage) {
+    //   user.profile.profileImage = APP_URL + user.profile.profileImage
+    // } else {
+    //   user.profile.profileImage = null;
+    // }
+
+
+    if (user.profile.profileImage && !user.profile.profileImage.startsWith('http')) {
+      user.profile.profileImage = APP_URL + user.profile.profileImage;
     }
+
     return res.status(200).json({
       success: true,
       status: 200, profile: user.profile
@@ -615,7 +621,8 @@ export const signup_google = async (req: Request, res: Response) => {
         profile: {
           fullName: name,
           email: email,
-          profileImage: profileImage
+          profileImage: profileImage,
+          nickName : name
         },
       });
     }
