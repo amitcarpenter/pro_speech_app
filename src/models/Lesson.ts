@@ -6,7 +6,9 @@ export interface ILesson extends Document {
   quiz_ids: Types.ObjectId;
   lesstionDetailsId: Types.ObjectId;
   completed_by: Types.ObjectId[];
-  question_count: number
+  question_count: number,
+  completed_lesson: boolean
+  _id: Types.ObjectId;
 
 }
 
@@ -16,7 +18,8 @@ const lessonSchema = new Schema<ILesson>({
   quiz_ids: { type: Schema.Types.ObjectId, ref: 'Quiz' },
   lesstionDetailsId: { type: Schema.Types.ObjectId, ref: 'LessionDetails' },
   completed_by: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  question_count: { type: Number }
+  question_count: { type: Number },
+  completed_lesson: { type: Boolean }
 
 });
 

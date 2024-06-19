@@ -1,7 +1,11 @@
 import { Request, Response } from 'express';
 import Joi from 'joi';
-import Lesson from '../models/Lesson';
+import Lesson, { ILesson } from '../models/Lesson';
 import Quiz from '../models/Quiz';
+import User, { IUser } from "../models/User"
+import { Types } from 'mongoose';
+import { ObjectId } from 'mongoose';
+
 
 // // Create a new lesson
 export const createLesson = async (req: Request, res: Response) => {
@@ -136,29 +140,157 @@ export const deleteLessonById = async (req: Request, res: Response) => {
 
 
 // Get Lesson by section id
+// export const getLessonByModuleId = async (req: Request, res: Response) => {
+//     try {
+//         const moduleId = req.params.id;
+//         const user_req = req.user as IUser;
+//         const user = await User.findById(user_req.id);
+//         const lessons = await Lesson.find({ module_id: moduleId });
+
+//         if (!lessons.length) {
+//             return res.status(404).json({
+//                 success: false,
+//                 status: 404,
+//                 message: 'No lesson found for the given module ID.',
+//             });
+//         }
+//         if (!user) {
+//             return res.status(404).json({
+//                 success: false,
+//                 status: 404,
+//                 message: 'User not found.',
+//             });
+//         }
+
+
+//         const completedLessons = user.completed_lessons || [];
+
+//         const lessonsWithQuizCount = await Promise.all(lessons.map(async (lesson) => {
+//             const quizzes = await Quiz.find({ lesson_id: lesson._id });
+//             const questionCount = quizzes.reduce((count, quiz) => count + quiz.questions.length, 0);
+
+//             // Update the lesson's question_count field
+//             lesson.question_count = questionCount;
+//             let matched_lesson = completedLessons.includes(lesson._id)
+
+//             await lesson.save();
+//             return lesson.toObject();
+//         }));
+
+//         return res.status(200).json({
+//             success: true,
+//             status: 200,
+//             data: lessonsWithQuizCount,
+//         });
+//     } catch (error: any) {
+//         console.error('Error fetching lessons by module ID:', error);
+//         return res.status(500).json({
+//             success: false,
+//             status: 500,
+//             message: error.message,
+//         });
+//     }
+// };
+
+
+// export const getLessonByModuleId = async (req: Request, res: Response) => {
+//     try {
+//         const moduleId = req.params.id;
+//         const user_req = req.user as IUser
+//         const user = await User.findById(user_req.id);
+
+//         const lessons = await Lesson.find({ module_id: moduleId });
+
+//         if (!lessons.length) {
+//             return res.status(404).json({
+//                 success: false,
+//                 status: 404,
+//                 message: 'No lesson found for the given module ID.',
+//             });
+//         }
+
+//         // const user = await User.findById(userId);
+
+//         if (!user) {
+//             return res.status(404).json({
+//                 success: false,
+//                 status: 404,
+//                 message: 'User not found.',
+//             });
+//         }
+
+//         const completedLessons = user.completed_lessons || [];
+
+//         const lessonsWithQuizCount = await Promise.all(lessons.map(async (lesson) => {
+//             const quizzes = await Quiz.find({ lesson_id: lesson._id });
+//             const questionCount = quizzes.reduce((count, quiz) => count + quiz.questions.length, 0);
+
+//             // Update the lesson's question_count field
+//             lesson.question_count = questionCount;
+//             await lesson.save();
+
+//             const lessonObject = lesson.toObject();
+//             lessonObject.completed_lesson = completedLessons.includes(lesson._id.toString());
+
+//             return lessonObject;
+//         }));
+
+//         return res.status(200).json({
+//             success: true,
+//             status: 200,
+//             data: lessonsWithQuizCount,
+//         });
+//     } catch (error: any) {
+//         console.error('Error fetching lessons by module ID:', error);
+//         return res.status(500).json({
+//             success: false,
+//             status: 500,
+//             message: error.message,
+//         });
+//     }
+// };
+
 export const getLessonByModuleId = async (req: Request, res: Response) => {
     try {
         const moduleId = req.params.id;
-        console.log(moduleId);
-        const lessons = await Lesson.find({ module_id: moduleId });
+        const user_req = req.user as IUser;
+        const user = await User.findById(user_req.id);
 
-        if (!lessons.length) {
+        if (!user) {
             return res.status(404).json({
                 success: false,
                 status: 404,
-                message: 'No lesson found for the given module ID.',
+                message: 'User not found.',
             });
         }
 
-        // Using Promise.all to handle asynchronous operations inside the loop
+        const lessons = await Lesson.find({ module_id: moduleId });
+
+        if (!lessons || lessons.length === 0) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: 'No lessons found for the given module ID.',
+            });
+        }
+
+        const completedLessons = user.completed_lessons || [];
+
         const lessonsWithQuizCount = await Promise.all(lessons.map(async (lesson) => {
-            const quizzes = await Quiz.find({ lesson_id: lesson._id });
+            // Cast lesson to ILesson to resolve TypeScript error
+            const lessonTyped = lesson as ILesson;
+
+            const quizzes = await Quiz.find({ lesson_id: lessonTyped._id });
             const questionCount = quizzes.reduce((count, quiz) => count + quiz.questions.length, 0);
 
-            // Update the lesson's question_count field
-            lesson.question_count = questionCount;
-            await lesson.save(); 
-            return lesson.toObject();
+            lessonTyped.question_count = questionCount;
+            lessonTyped.completed_lesson = completedLessons.some((completedLessonId) =>
+                completedLessonId.equals(lessonTyped._id)
+            );
+
+            await lessonTyped.save();
+
+            return lessonTyped.toObject();
         }));
 
         return res.status(200).json({
