@@ -1,7 +1,12 @@
 import express, { Application } from "express";
 import cookieParser from "cookie-parser";
-import bodyParser from "body-parser"
+import cors from "cors";
+
+//==================================== middleware ==============================
+
 import { authenticateUser } from "../middlewares/auth";
+
+//==================================== Import Routes ==============================
 
 import user_router from "../routes/userRoutes";
 import quizRoutes from "../routes/quizRoutes";
@@ -14,22 +19,24 @@ import privacyPolicyRouters from "../routes//privacyPolicyRoutes";
 import termsAndConditionsRoutes from "../routes/termsAndConditionsRoutes";
 
 
+//==================================== configureApp ==============================
+
 const configureApp = (app: Application): void => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
+  app.use(cors())
   app.use("/api/auth", user_router);
-  app.use('/api/quizzes', quizRoutes);
-  app.use('/api/lessons', lessonRoutes);
-  app.use('/api/modules', moduleRoutes);
-  app.use('/api/sections', sectionRoutes);
-  app.use('/api/scores', scoreRoutes);
-  app.use('/api/lessonDetails', lessonDetailsRoutes);
-  app.use('/api/privacy-policy', privacyPolicyRouters);
-  app.use('/api/terms-and-conditions', termsAndConditionsRoutes);
+  app.use('/api/quizzes', authenticateUser, quizRoutes);
+  app.use('/api/lessons', authenticateUser, lessonRoutes);
+  app.use('/api/modules', authenticateUser, moduleRoutes);
+  app.use('/api/sections', authenticateUser, sectionRoutes);
+  app.use('/api/scores', authenticateUser, scoreRoutes);
+  app.use('/api/lessonDetails', authenticateUser, lessonDetailsRoutes);
+  app.use('/api/privacy-policy', authenticateUser, privacyPolicyRouters);
+  app.use('/api/terms-and-conditions', authenticateUser, termsAndConditionsRoutes);
 
 };
-
 
 
 export default configureApp;

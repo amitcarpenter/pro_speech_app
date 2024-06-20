@@ -45,33 +45,6 @@ export const getAllPrivacyPolicies = async (req: Request, res: Response) => {
     }
 };
 
-// Get a single Privacy Policy by ID
-// export const getPrivacyPolicyById = async (req: Request, res: Response) => {
-//     try {
-//         const privacyPolicy = await PrivacyPolicy.findById(req.params.id);
-
-//         if (!privacyPolicy) {
-//             return res.status(404).json({
-//                 success: false,
-//                 status: 404,
-//                 message: 'Privacy Policy not found',
-//             });
-//         }
-
-//         return res.status(200).json({
-//             success: true,
-//             status: 200,
-//             data: privacyPolicy,
-//         });
-//     } catch (error: any) {
-//         return res.status(500).json({
-//             success: false,
-//             status: 500,
-//             error: error.message,
-//         });
-//     }
-// };
-
 // Update a Privacy Policy by ID
 export const updatePrivacyPolicy = async (req: Request, res: Response) => {
     try {
@@ -106,6 +79,7 @@ export const updatePrivacyPolicy = async (req: Request, res: Response) => {
         });
     }
 };
+
 // Delete a Privacy Policy by ID
 export const deletePrivacyPolicy = async (req: Request, res: Response) => {
     try {

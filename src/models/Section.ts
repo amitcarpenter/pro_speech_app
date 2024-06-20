@@ -1,5 +1,3 @@
-
-
 import { Schema, model, Document, Types } from 'mongoose';
 
 interface ISection extends Document {
@@ -18,8 +16,6 @@ const sectionSchema = new Schema<ISection>({
   modules: [{ type: Schema.Types.ObjectId, ref: 'Module' }],
   completed_by: [{ type: Schema.Types.ObjectId, ref: 'User' }],
 });
-
-
 
 const Section = model<ISection>('Section', sectionSchema);
 

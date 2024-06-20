@@ -3,17 +3,14 @@ import mongoose from 'mongoose';
 import Joi from "joi"
 import LessonDetail from '../models/LessionDetails';
 
-
-
 const APP_URL = process.env.APP_URL as string
-
-
 
 // Validate for the lesson deatils 
 const lessonDetailSchema = Joi.object({
     lesson_content: Joi.string().optional(),
     lessonId: Joi.string().required()
 });
+
 
 // Create Lesson Details 
 export const createLessonDetails = async (req: Request, res: Response) => {
@@ -63,7 +60,6 @@ export const createLessonDetails = async (req: Request, res: Response) => {
         });
     }
 }
-
 
 // get LessonDetails by lesson id
 export const getLessonDetailsByLessonId = async (req: Request, res: Response) => {

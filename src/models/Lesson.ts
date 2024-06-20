@@ -1,6 +1,5 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
-// InterFace For Lesson
 export interface ILesson extends Document {
   lesson_name: string;
   module_id: Types.ObjectId;
@@ -21,7 +20,6 @@ const lessonSchema = new Schema<ILesson>({
   completed_by: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   question_count: { type: Number },
   completed_lesson: { type: Boolean }
-
 });
 
 const Lesson = model<ILesson>('Lesson', lessonSchema);

@@ -1,19 +1,18 @@
 import { Router } from 'express';
-import { createSection, getSections, updateSection, deleteSection, getSectionById } from '../controllers/sectionController';
+import { createSection, getSections, updateSection, deleteSection } from '../controllers/sectionController';
 
 import { uploadSectionImage } from "../services/uploadImage"
-import { authenticateUser } from "../middlewares/auth";
+import { authenticateUser, isAdmin } from "../middlewares/auth";
 
 const router = Router();
 
-router.post('/', authenticateUser, uploadSectionImage, createSection);
-
+//=================================== Routes for User ==============================
 router.get('/', authenticateUser, getSections);
+router.put('/:id', authenticateUser, isAdmin, updateSection);
 
-router.get('/:id', authenticateUser, getSectionById);
 
-router.put('/:id', authenticateUser, updateSection);
-
-router.delete('/:id', authenticateUser, deleteSection);
+//==================================== Routes for ADMIN ==============================
+router.post('/', authenticateUser, isAdmin, uploadSectionImage, createSection);
+router.delete('/:id', authenticateUser, isAdmin, deleteSection);
 
 export default router;

@@ -1,5 +1,3 @@
-
-
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IModule extends Document {
@@ -20,7 +18,6 @@ const moduleSchema = new Schema<IModule>({
   completed_by: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   lesson_count: { type: Number }
 });
-
 
 
 const Module = model<IModule>('Module', moduleSchema);

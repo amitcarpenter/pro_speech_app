@@ -6,9 +6,12 @@ import Joi from 'joi';
 
 import { generateOTP, send_otp_on_email } from '../services/otpService';
 import { generateAccessToken } from "../utils/jwt"
+import { handleError } from '../utils/errorHandle';
 
 const APP_URL = process.env.APP_URL as string
 
+
+//==================================== Controller for USER side ==============================
 
 // Function for register
 export const register = async (req: Request, res: Response) => {
@@ -18,8 +21,9 @@ export const register = async (req: Request, res: Response) => {
     const registerSchema = Joi.object({
       name: Joi.string().min(3).max(30).required(),
       email: Joi.string().email().required(),
-      // phone: Joi.string().min(10).max(15).required(),
-      password: Joi.string().min(8).required()
+      // phone: Joi.string().min(10).max(15).optional(), 
+      password: Joi.string().min(8).required(),
+      role: Joi.string().valid('admin', 'user').optional()
     });
 
     const { error, value } = registerSchema.validate(req.body);
@@ -31,14 +35,14 @@ export const register = async (req: Request, res: Response) => {
       });
     }
 
-    const { name, email, phone, password } = value;
+    const { name, email, phone, password, role } = value;
 
     const exist_email = await User.findOne({ email: email });
     if (exist_email) {
       return res.status(400).json({
         success: false,
         status: 400,
-        message: "Email Already Exist"
+        message: "Email Already Exists"
       });
     }
 
@@ -49,16 +53,17 @@ export const register = async (req: Request, res: Response) => {
     const newUser = new User({
       name,
       email,
-      phone,
+      phone: phone || null,
       password: hashedPassword,
       hide_password: password,
       isVerified: false,
       otp,
+      role: role || 'user',
       otpExpires,
       profile: {
         fullName: name,
         email: email,
-        phone: phone
+        phone: phone || null
       }
     });
 
@@ -622,7 +627,7 @@ export const signup_google = async (req: Request, res: Response) => {
           fullName: name,
           email: email,
           profileImage: profileImage,
-          nickName : name
+          nickName: name
         },
       });
     }
@@ -716,78 +721,41 @@ export const signup_facebook = async (req: Request, res: Response) => {
 };
 
 
+//==================================== Controller for Admin side ==============================
 
-// // Controller for handling Google OAuth authentication
-// export const googleAuthController = (req: Request, res: Response) => {
-//   const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID as string;
-//   const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET as string;
-//   const CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL as string;
-//   passport.use(new GoogleStrategy({
-//     clientID: GOOGLE_CLIENT_ID,
-//     clientSecret: GOOGLE_CLIENT_SECRET,
-//     callbackURL: CALLBACK_URL
-//   }, async (accessToken, refreshToken, profile, done) => {
-//     try {
-//       console.log(accessToken, refreshToken)
-//       const user = await User.findOne({ googleId: profile.id });
-//       if (!user) {
-//         const newUser = new User({ googleId: profile.id });
-//         await newUser.save();
-//         done(null, newUser);
-//       } else {
-//         done(null, user);
-//       }
-//     } catch (error) {
-//       done(error, undefined);
+// Get User List 
+export const get_user_list = async (req: Request, res: Response) => {
+  try {
+    const user_list = await User.find()
+    if (!user_list) {
+      return handleError(res, 404, "user list not found")
+    }
+    return res.status(200).json({
+      success: true,
+      status: 200,
+      data: user_list
+    })
+  } catch (error: any) {
+    return handleError(res, 500, error.message);
+  }
+}
+
+// export const get_user_by_id = async (req: Request, res: Response) => {
+//   try {
+//     const { id } = req.params.id
+//     const user_list = await User.findById(id)
+
+//     if (!user_list) {
+//       return handleError(res, 404, "user list not found")
 //     }
-//   }));
-//   passport.authenticate('google', { scope: ['profile', 'email'] })(req, res);
-// };
+//     return res.status(200).json({
+//       success: true,
+//       status: 200,
+//       data: user_list
+//     })
+//   } catch (error: any) {
+//     return handleError(res, 500, error.message);
+//   }
+// }
 
-// // Callback controller for handling Google OAuth callback
-// export const googleAuthCallbackController = (req: Request, res: Response) => {
-//   passport.authenticate('google', { failureRedirect: '/login' })(req, res, () => {
-//     res.redirect('/');
-//   });
-// };
-
-// // Controller for handling Facebook authentication
-// export const facebookAuthController = (req: Request, res: Response) => {
-//   const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID as string;
-//   const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET as string;
-//   const CALLBACK_URL = process.env.FACEBOOK_CALLBACK_URL as string;
-
-//   passport.use(new FacebookStrategy({
-//     clientID: FACEBOOK_APP_ID,
-//     clientSecret: FACEBOOK_APP_SECRET,
-//     callbackURL: CALLBACK_URL,
-//     profileFields: ['id', 'emails', 'name']
-//   }, async (accessToken, refreshToken, profile, done) => {
-//     try {
-//       const user = await User.findOne({ facebookId: profile.id });
-//       if (!user) {
-//         const newUser = new User({
-//           facebookId: profile.id,
-//           email: profile.emails ? profile.emails[0].value : null,
-//           firstName: profile.name?.givenName,
-//           lastName: profile.name?.familyName
-//         });
-//         await newUser.save();
-//         done(null, newUser);
-//       } else {
-//         done(null, user);
-//       }
-//     } catch (error) {
-//       done(error, null);
-//     }
-//   }));
-//   passport.authenticate('facebook')(req, res);
-// };
-
-// // Callback controller for handling Facebook OAuth callback
-// export const facebookAuthCallbackController = (req: Request, res: Response) => {
-//   passport.authenticate('facebook', { failureRedirect: '/login' })(req, res, () => {
-//     res.redirect('/');
-//   });
-// };
 

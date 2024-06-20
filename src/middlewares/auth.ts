@@ -6,7 +6,7 @@ const JWT_SECRET = process.env.JWT_SECRET as string;
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION as string;
 
 // Middleware for authenticating user
-const authenticateUser = async (req: Request, res: Response, next: NextFunction) => {
+export const authenticateUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authorizationHeader = req.headers['authorization'];
     if (!authorizationHeader) {
@@ -55,4 +55,19 @@ const authenticateUser = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
-export { authenticateUser };
+
+// Chack Admin Or Not Middle ware
+export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
+  const user = req.user as IUser;
+
+  if (user.role !== 'admin') {
+    return res.status(403).json({
+      success: false,
+      status: 403,
+      message: 'Forbidden: You do not have the necessary permissions'
+    });
+  }
+  next();
+};
+
+

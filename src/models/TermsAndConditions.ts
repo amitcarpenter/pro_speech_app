@@ -1,4 +1,3 @@
-import { required } from 'joi';
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ITermsCondition extends Document {

@@ -1,12 +1,18 @@
 import nodemailer from 'nodemailer';
+const EMAIL_USER = process.env.EMAIL_USER
+const EMAIL_PASS = process.env.EMAIL_PASS
+
+interface SendOtpEmailOptions {
+    to: string;
+    otp: string;
+}
+
 
 // Generate OTP 
 export const generateOTP = (): string => {
     return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
-const EMAIL_USER = process.env.EMAIL_USER
-const EMAIL_PASS = process.env.EMAIL_PASS
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -18,10 +24,6 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-interface SendOtpEmailOptions {
-    to: string;
-    otp: string;
-}
 
 // send email 
 export const send_otp_on_email = async ({ to, otp }: SendOtpEmailOptions): Promise<void> => {

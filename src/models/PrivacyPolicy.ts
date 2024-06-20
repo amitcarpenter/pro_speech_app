@@ -6,7 +6,6 @@ interface IPrivacyPolicy extends Document {
     content: string;
 }
 
-
 const privacyPolicySchema = new Schema<IPrivacyPolicy>({
     title: { type: String, required: true },
     subTitle: { type: String },
