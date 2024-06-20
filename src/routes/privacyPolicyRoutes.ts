@@ -2,7 +2,7 @@ import express from 'express';
 import {
     createPrivacyPolicy,
     getAllPrivacyPolicies,
-    getPrivacyPolicyById,
+    // getPrivacyPolicyById,
     updatePrivacyPolicy,
     deletePrivacyPolicy,
 } from '../controllers/privacyPolicyController';
@@ -15,8 +15,8 @@ const router = express.Router();
 // Define routes
 router.post('/create', authenticateUser, createPrivacyPolicy);
 router.get('/', authenticateUser, getAllPrivacyPolicies);
-router.get('/:id', authenticateUser, getPrivacyPolicyById);
-router.put('/:id', authenticateUser, updatePrivacyPolicy);
+// router.get('/:id', authenticateUser, getPrivacyPolicyById);
+router.put('/', authenticateUser, updatePrivacyPolicy);
 router.delete('/:id', authenticateUser, deletePrivacyPolicy);
 
 export default router;

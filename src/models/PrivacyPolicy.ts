@@ -2,12 +2,14 @@ import { Schema, model, Document } from 'mongoose';
 
 interface IPrivacyPolicy extends Document {
     title: string;
+    subTitle: string;
     content: string;
 }
 
 
 const privacyPolicySchema = new Schema<IPrivacyPolicy>({
     title: { type: String, required: true },
+    subTitle: { type: String },
     content: { type: String, required: true },
 }, {
     timestamps: true 

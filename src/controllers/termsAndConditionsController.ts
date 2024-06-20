@@ -42,9 +42,7 @@ export const getTermsConditionById = async (req: Request, res: Response) => {
 export const updateTermsCondition = async (req: Request, res: Response) => {
     try {
         const { title, subTitle, content } = req.body;
-        console.log(req.body)
         const termsCondition = await TermsCondition.findOne();
-        console.log(termsCondition, "termsandcondition")
 
         if (!termsCondition) {
             return res.status(404).json({ success: false, status: 404, message: 'Terms and Conditions not found' });
