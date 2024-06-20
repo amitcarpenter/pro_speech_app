@@ -229,7 +229,7 @@ export const login = async (req: Request, res: Response) => {
     await user.save()
     return res.status(200).json({
       success: true,
-      status: 200, token
+      status: 200, message: "Login Successful", token
     });
   } catch (error: any) {
     return res.status(500).json({
