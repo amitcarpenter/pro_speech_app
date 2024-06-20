@@ -1,5 +1,6 @@
 import express, { Application } from "express";
 import cookieParser from "cookie-parser";
+import bodyParser from "body-parser"
 import { authenticateUser } from "../middlewares/auth";
 
 import user_router from "../routes/userRoutes";
