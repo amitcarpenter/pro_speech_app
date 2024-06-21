@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
-import TermsCondition, { ITermsCondition } from '../models/TermsAndConditions';
+import TermsCondition, { ITermsCondition } from '../../models/TermsAndConditions';
 
 
 //==================================== Controller for USER side ==============================

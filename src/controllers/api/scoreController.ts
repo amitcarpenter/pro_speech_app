@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import User, { IUser } from '../models/User';
-import Score from '../models/Score';
+import User, { IUser } from '../../models/User';
+import Score from '../../models/Score';
 
 
 

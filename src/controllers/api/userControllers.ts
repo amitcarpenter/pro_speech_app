@@ -1,15 +1,13 @@
+import { Request, Response } from "express";
+import User, { IUser } from "../../models/User";
+import bcrypt from "bcryptjs";
+import Joi from "joi";
 
-import { Request, Response } from 'express';
-import User, { IUser } from '../models/User';
-import bcrypt from 'bcryptjs';
-import Joi from 'joi';
+import { generateOTP, send_otp_on_email } from "../../services/otpService";
+import { generateAccessToken } from "../../utils/jwt";
+import { handleError } from "../../utils/errorHandle";
 
-import { generateOTP, send_otp_on_email } from '../services/otpService';
-import { generateAccessToken } from "../utils/jwt"
-import { handleError } from '../utils/errorHandle';
-
-const APP_URL = process.env.APP_URL as string
-
+const APP_URL = process.env.APP_URL as string;
 
 //==================================== Controller for USER side ==============================
 
@@ -21,9 +19,9 @@ export const register = async (req: Request, res: Response) => {
     const registerSchema = Joi.object({
       name: Joi.string().min(3).max(30).required(),
       email: Joi.string().email().required(),
-      // phone: Joi.string().min(10).max(15).optional(), 
+      // phone: Joi.string().min(10).max(15).optional(),
       password: Joi.string().min(8).required(),
-      role: Joi.string().valid('admin', 'user').optional()
+      role: Joi.string().valid("admin", "user").optional(),
     });
 
     const { error, value } = registerSchema.validate(req.body);
@@ -31,7 +29,7 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         status: 400,
-        message: error.details[0].message
+        message: error.details[0].message,
       });
     }
 
@@ -42,7 +40,7 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         status: 400,
-        message: "Email Already Exists"
+        message: "Email Already Exists",
       });
     }
 
@@ -58,13 +56,13 @@ export const register = async (req: Request, res: Response) => {
       hide_password: password,
       isVerified: false,
       otp,
-      role: role || 'user',
+      role: role || "user",
       otpExpires,
       profile: {
         fullName: name,
         email: email,
-        phone: phone || null
-      }
+        phone: phone || null,
+      },
     });
 
     await newUser.save();
@@ -73,13 +71,14 @@ export const register = async (req: Request, res: Response) => {
     return res.status(201).json({
       success: true,
       status: 201,
-      message: 'User registered successfully. Please verify your account.',
-      otp: otp
+      message: "User registered successfully. Please verify your account.",
+      otp: otp,
     });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
-      status: 500, error: error.message
+      status: 500,
+      error: error.message,
     });
   }
 };
@@ -89,14 +88,15 @@ export const verifyOTP = async (req: Request, res: Response) => {
   try {
     const verifyOTPSchema = Joi.object({
       email: Joi.string().email().required(),
-      otp: Joi.string().length(4).required()
+      otp: Joi.string().length(4).required(),
     });
 
     const { error, value } = verifyOTPSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
         success: false,
-        status: 400, message: error.details[0].message
+        status: 400,
+        message: error.details[0].message,
       });
     }
     const { email, otp } = value;
@@ -105,44 +105,45 @@ export const verifyOTP = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        status: 400, message: 'User not found.'
+        status: 400,
+        message: "User not found.",
       });
     }
 
     const currentTime = new Date();
 
     if (user.otp === otp && user.otpExpires && user.otpExpires > currentTime) {
-
-
       const payload: { userId: string; email: string } = {
         userId: user._id as string,
-        email: user.email
+        email: user.email,
       };
 
       const token = generateAccessToken(payload);
 
-
       user.isVerified = true;
       user.otp = undefined;
       user.otpExpires = undefined;
-      user.jwtToken = token
+      user.jwtToken = token;
       await user.save();
-
 
       return res.status(200).json({
         success: true,
-        status: 200, message: 'Email verified successfully.', token
+        status: 200,
+        message: "Email verified successfully.",
+        token,
       });
     } else {
       return res.status(400).json({
         success: false,
-        status: 400, message: 'Invalid or expired OTP.'
+        status: 400,
+        message: "Invalid or expired OTP.",
       });
     }
   } catch (error: any) {
     return res.status(500).json({
       success: false,
-      status: 500, error: error.message
+      status: 500,
+      error: error.message,
     });
   }
 };
@@ -155,7 +156,7 @@ export const resendOTPByEmail = async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         status: 400,
-        message: "Email Not Valid"
+        message: "Email Not Valid",
       });
     }
 
@@ -170,8 +171,8 @@ export const resendOTPByEmail = async (req: Request, res: Response) => {
     return res.status(200).json({
       success: true,
       status: 200,
-      message: 'OTP resent successfully',
-      otp: otp
+      message: "OTP resent successfully",
+      otp: otp,
     });
   } catch (error: any) {
     return res.status(500).json({
@@ -187,13 +188,14 @@ export const login = async (req: Request, res: Response) => {
   try {
     const loginSchema = Joi.object({
       email: Joi.string().email().required(),
-      password: Joi.string().min(8).required()
+      password: Joi.string().min(8).required(),
     });
     const { error, value } = loginSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
         success: false,
-        status: 400, message: error.details[0].message
+        status: 400,
+        message: error.details[0].message,
       });
     }
     const { email, password } = value;
@@ -201,7 +203,8 @@ export const login = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        status: 404, message: 'User not found.'
+        status: 404,
+        message: "User not found.",
       });
     }
 
@@ -209,32 +212,37 @@ export const login = async (req: Request, res: Response) => {
     if (!isMatch) {
       return res.status(400).json({
         success: false,
-        status: 400, message: 'Invalid credentials.'
+        status: 400,
+        message: "Invalid credentials.",
       });
     }
 
     if (!user.isVerified) {
       return res.status(400).json({
         success: false,
-        status: 400, message: 'User is not verified.'
+        status: 400,
+        message: "User is not verified.",
       });
     }
 
     const payload: { userId: string; email: string } = {
       userId: user._id as string,
-      email: user.email
+      email: user.email,
     };
     const token = generateAccessToken(payload);
     user.jwtToken = token;
-    await user.save()
+    await user.save();
     return res.status(200).json({
       success: true,
-      status: 200, message: "Login Successful", token
+      status: 200,
+      message: "Login Successful",
+      token,
     });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
-      status: 500, error: error.message
+      status: 500,
+      error: error.message,
     });
   }
 };
@@ -242,12 +250,13 @@ export const login = async (req: Request, res: Response) => {
 // Get Profile
 export const getProfile = async (req: Request, res: Response) => {
   try {
-    const user_req = req.user as IUser
+    const user_req = req.user as IUser;
     const user = await User.findById(user_req.id);
     if (!user) {
       return res.status(404).json({
         success: false,
-        status: 400, message: 'User not found'
+        status: 400,
+        message: "User not found",
       });
     }
 
@@ -257,19 +266,23 @@ export const getProfile = async (req: Request, res: Response) => {
     //   user.profile.profileImage = null;
     // }
 
-
-    if (user.profile.profileImage && !user.profile.profileImage.startsWith('http')) {
+    if (
+      user.profile.profileImage &&
+      !user.profile.profileImage.startsWith("http")
+    ) {
       user.profile.profileImage = APP_URL + user.profile.profileImage;
     }
 
     return res.status(200).json({
       success: true,
-      status: 200, profile: user.profile
+      status: 200,
+      profile: user.profile,
     });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
-      status: 400, error: error.message
+      status: 400,
+      error: error.message,
     });
   }
 };
@@ -281,18 +294,19 @@ export const updateProfile = async (req: Request, res: Response) => {
       fullName: Joi.string().optional(),
       nickName: Joi.string().optional(),
       dateOfBirth: Joi.date().iso().optional(),
-      gender: Joi.string().valid('Male', 'Female', 'Other').optional(),
-      phone: Joi.string().min(10).max(15).optional()
+      gender: Joi.string().valid("Male", "Female", "Other").optional(),
+      phone: Joi.string().min(10).max(15).optional(),
     });
 
     const { error } = updateProfileSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
         success: false,
-        status: 400, message: error.details[0].message
+        status: 400,
+        message: error.details[0].message,
       });
     }
-    console.log(req.file)
+    console.log(req.file);
 
     const { fullName, nickName, dateOfBirth, gender, phone } = req.body;
     const user_req = req.user as IUser;
@@ -315,18 +329,21 @@ export const updateProfile = async (req: Request, res: Response) => {
       await user.save();
       return res.status(200).json({
         success: true,
-        status: 200, message: 'Profile updated successfully.'
+        status: 200,
+        message: "Profile updated successfully.",
       });
     } else {
       return res.status(404).json({
         success: false,
-        status: 400, message: 'User not found.'
+        status: 400,
+        message: "User not found.",
       });
     }
   } catch (error: any) {
     return res.status(500).json({
       success: false,
-      status: 500, error: error.message
+      status: 500,
+      error: error.message,
     });
   }
 };
@@ -335,14 +352,14 @@ export const updateProfile = async (req: Request, res: Response) => {
 export const forgotPassword = async (req: Request, res: Response) => {
   try {
     const forgotPasswordSchema = Joi.object({
-      email: Joi.string().email().required()
+      email: Joi.string().email().required(),
     });
     const { error } = forgotPasswordSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
         success: false,
         status: 400,
-        message: error.details[0].message
+        message: error.details[0].message,
       });
     }
     const { email } = req.body;
@@ -351,8 +368,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         status: 404,
-        message: 'User not found',
-
+        message: "User not found",
       });
     }
 
@@ -365,32 +381,35 @@ export const forgotPassword = async (req: Request, res: Response) => {
     return res.status(200).json({
       success: true,
       status: 200,
-      message: 'OTP sent successfully',
-      otp: otp
+      message: "OTP sent successfully",
+      otp: otp,
     });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
       status: 500,
-      error: error.message
+      error: error.message,
     });
   }
 };
 
 // Verify otp for the forgot password
-export const verify_otp_forgot_password = async (req: Request, res: Response) => {
+export const verify_otp_forgot_password = async (
+  req: Request,
+  res: Response
+) => {
   try {
     const verifyOtpForgotPasswordSchema = Joi.object({
       email: Joi.string().email().required(),
       otp: Joi.string().length(4).required(),
     });
 
-
     const { error } = verifyOtpForgotPasswordSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
         success: false,
-        status: 400, message: error.details[0].message
+        status: 400,
+        message: error.details[0].message,
       });
     }
 
@@ -400,21 +419,27 @@ export const verify_otp_forgot_password = async (req: Request, res: Response) =>
     if (!user) {
       return res.status(404).json({
         success: false,
-        status: 404, message: 'User not found'
+        status: 404,
+        message: "User not found",
       });
     }
     if (!user.resetPasswordOTPExpires) {
       return res.status(400).json({
         success: false,
-        status: 404, message: 'Session expired'
+        status: 404,
+        message: "Session expired",
       });
     }
 
     const currentTime = new Date();
-    if (user.resetPasswordOTP !== otp || user.resetPasswordOTPExpires < currentTime) {
+    if (
+      user.resetPasswordOTP !== otp ||
+      user.resetPasswordOTPExpires < currentTime
+    ) {
       return res.status(400).json({
         success: false,
-        status: 400, message: 'Invalid or expired OTP'
+        status: 400,
+        message: "Invalid or expired OTP",
       });
     }
     user.resetPasswordOTP = undefined;
@@ -423,12 +448,14 @@ export const verify_otp_forgot_password = async (req: Request, res: Response) =>
 
     return res.status(200).json({
       success: true,
-      status: 200, message: 'otp verifed successfully'
+      status: 200,
+      message: "otp verifed successfully",
     });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
-      status: 500, error: error.message
+      status: 500,
+      error: error.message,
     });
   }
 };
@@ -438,13 +465,14 @@ export const changePasswordByEmail = async (req: Request, res: Response) => {
   try {
     const changePasswordByEmailSchema = Joi.object({
       email: Joi.string().email().required(),
-      password: Joi.string().min(6).required()
+      password: Joi.string().min(6).required(),
     });
     const { error } = changePasswordByEmailSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
         success: false,
-        status: 400, message: error.details[0].message
+        status: 400,
+        message: error.details[0].message,
       });
     }
 
@@ -454,23 +482,27 @@ export const changePasswordByEmail = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        status: 404, message: 'User not found'
+        status: 404,
+        message: "User not found",
       });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
     user.hide_password = password;
+    user.signupMethod = "traditional";
     await user.save();
 
     return res.status(200).json({
       success: true,
-      status: 200, message: 'Password changed successfully'
+      status: 200,
+      message: "Password changed successfully",
     });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
-      status: 500, error: error.message
+      status: 500,
+      error: error.message,
     });
   }
 };
@@ -480,13 +512,14 @@ export const changePassword = async (req: Request, res: Response) => {
   try {
     const changePasswordSchema = Joi.object({
       currentPassword: Joi.string().required(),
-      newPassword: Joi.string().min(6).required()
+      newPassword: Joi.string().min(6).required(),
     });
     const { error } = changePasswordSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
         success: false,
-        status: 400, message: error.details[0].message
+        status: 400,
+        message: error.details[0].message,
       });
     }
 
@@ -497,7 +530,8 @@ export const changePassword = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        status: 404, message: 'User not found'
+        status: 404,
+        message: "User not found",
       });
     }
 
@@ -505,7 +539,8 @@ export const changePassword = async (req: Request, res: Response) => {
     if (!isMatch) {
       return res.status(400).json({
         success: false,
-        status: 400, message: 'Current password is incorrect'
+        status: 400,
+        message: "Current password is incorrect",
       });
     }
 
@@ -516,12 +551,14 @@ export const changePassword = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       success: true,
-      status: 200, message: 'Password changed successfully'
+      status: 200,
+      message: "Password changed successfully",
     });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
-      status: 500, error: error.message
+      status: 500,
+      error: error.message,
     });
   }
 };
@@ -529,61 +566,67 @@ export const changePassword = async (req: Request, res: Response) => {
 // Update profile image
 export const profile_image_update = async (req: Request, res: Response) => {
   try {
-    const user_req = req.user as IUser
+    const user_req = req.user as IUser;
     const user = await User.findById(user_req.id);
     if (!user) {
       return res.status(400).json({
         success: false,
-        status: 400, message: "user not found"
-      })
+        status: 400,
+        message: "user not found",
+      });
     }
     if (req.file) {
-      user.profile.profileImage = req.file.filename
-      await user.save()
+      user.profile.profileImage = req.file.filename;
+      await user.save();
       return res.status(200).json({
         success: true,
-        status: 200, messsage: "Profile Image successfully Update"
-      })
+        status: 200,
+        messsage: "Profile Image successfully Update",
+      });
     }
   } catch (error: any) {
     return res.status(500).json({
       success: false,
-      status: 500, error: error.message
-    })
+      status: 500,
+      error: error.message,
+    });
   }
-}
+};
 
 // Delete Profile Image
 export const remove_profile_image = async (req: Request, res: Response) => {
   try {
-    const user_req = req.user as IUser
+    const user_req = req.user as IUser;
     const user = await User.findById(user_req.id);
     if (!user) {
       return res.status(400).json({
         success: false,
-        status: 400, message: "user not found"
-      })
+        status: 400,
+        message: "user not found",
+      });
     }
     if (!user.profile.profileImage) {
       return res.status(404).json({
         success: false,
-        status: 404, message: "Profile Image is not Found"
-      })
+        status: 404,
+        message: "Profile Image is not Found",
+      });
     }
     user.profile.profileImage = null;
-    await user.save()
+    await user.save();
     return res.status(200).json({
       success: true,
-      status: 200, messsage: "Profile Image delete successfully "
-    })
-
+      status: 200,
+      messsage: "Profile Image delete successfully ",
+    });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
-      status: 500, error: error.message
-    })
+      status: 500,
+      error: error.message,
+    });
   }
-}
+};
 
 // Google OAuth route
 export const signup_google = async (req: Request, res: Response) => {
@@ -591,7 +634,7 @@ export const signup_google = async (req: Request, res: Response) => {
     email: Joi.string().email().required(),
     googleId: Joi.string().required(),
     name: Joi.string().optional(),
-    profileImage: Joi.string().optional()
+    profileImage: Joi.string().optional(),
   });
 
   const { error } = signupGoogleSchema.validate(req.body);
@@ -599,7 +642,7 @@ export const signup_google = async (req: Request, res: Response) => {
     return res.status(400).json({
       success: false,
       status: 400,
-      message: error.details[0].message
+      message: error.details[0].message,
     });
   }
 
@@ -614,20 +657,20 @@ export const signup_google = async (req: Request, res: Response) => {
     if (user) {
       user.name = name || user.name;
       user.googleId = googleId;
-      user.signupMethod = 'google';
+      user.signupMethod = "google";
       user.isVerified = true;
     } else {
       user = new User({
         email,
         googleId,
         name,
-        signupMethod: 'google',
+        signupMethod: "google",
         isVerified: true,
         profile: {
           fullName: name,
           email: email,
           profileImage: profileImage,
-          nickName: name
+          nickName: name,
         },
       });
     }
@@ -635,7 +678,7 @@ export const signup_google = async (req: Request, res: Response) => {
     // Generate JWT token
     const payload: { userId: string; email: string } = {
       userId: user._id as string,
-      email: user.email
+      email: user.email,
     };
     const token = generateAccessToken(payload);
     user.jwtToken = token;
@@ -646,15 +689,15 @@ export const signup_google = async (req: Request, res: Response) => {
     return res.status(201).json({
       success: true,
       status: 201,
-      message: 'User registered successfully via Google',
-      token
+      message: "User registered successfully via Google",
+      token,
     });
   } catch (error: any) {
-    console.error('Error during Google signup:', error);
+    console.error("Error during Google signup:", error);
     return res.status(500).json({
       success: false,
       status: 500,
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -673,7 +716,7 @@ export const signup_facebook = async (req: Request, res: Response) => {
     return res.status(400).json({
       success: false,
       status: 400,
-      message: error.details[0].message
+      message: error.details[0].message,
     });
   }
 
@@ -683,79 +726,62 @@ export const signup_facebook = async (req: Request, res: Response) => {
     let user = await User.findOne({ email });
     if (user) {
       user.facebookId = facebookId;
-      user.isVerified = true
+      user.isVerified = true;
     } else {
       user = new User({
         email,
         facebookId,
-        signupMethod: 'facebook',
+        signupMethod: "facebook",
         isVerified: true,
         profile: {
           fullName: name,
           email: email,
-          profileImage: profileImage
+          profileImage: profileImage,
         },
       });
     }
 
     const payload: { userId: string; email: string } = {
       userId: user._id as string,
-      email: user.email
+      email: user.email,
     };
     const token = generateAccessToken(payload);
-    user.jwtToken = token
+    user.jwtToken = token;
     await user.save();
     return res.status(201).json({
       success: true,
       status: 201,
-      message: 'User registered successfully via Facebook',
-      token
+      message: "User registered successfully via Facebook",
+      token,
     });
   } catch (error: any) {
     return res.status(500).send({
       success: false,
       status: 500,
-      error: error.message
+      error: error.message,
     });
   }
 };
 
-
-//==================================== Controller for Admin side ==============================
-
-// Get User List 
-export const get_user_list = async (req: Request, res: Response) => {
+// check if password entered
+export const isPassword = async (req: Request, res: Response) => {
   try {
-    const user_list = await User.find()
-    if (!user_list) {
-      return handleError(res, 404, "user list not found")
+    const user_req = req.user as IUser;
+    const user = await User.findById(user_req.id);
+    let isPasswordEnter = false;
+    if (user?.signupMethod == "traditional") {
+      isPasswordEnter = true;
     }
     return res.status(200).json({
-      success: true,
+      succuss: true,
       status: 200,
-      data: user_list
-    })
+      isPasswordEnter,
+    });
   } catch (error: any) {
-    return handleError(res, 500, error.message);
+    return res.status(500).send({
+      success: false,
+      status: 500,
+      error: error.message,
+    });
   }
-}
-
-// export const get_user_by_id = async (req: Request, res: Response) => {
-//   try {
-//     const { id } = req.params.id
-//     const user_list = await User.findById(id)
-
-//     if (!user_list) {
-//       return handleError(res, 404, "user list not found")
-//     }
-//     return res.status(200).json({
-//       success: true,
-//       status: 200,
-//       data: user_list
-//     })
-//   } catch (error: any) {
-//     return handleError(res, 500, error.message);
-//   }
-// }
-
-
+};
