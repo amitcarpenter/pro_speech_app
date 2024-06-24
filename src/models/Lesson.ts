@@ -13,7 +13,7 @@ export interface ILesson extends Document {
 
 const lessonSchema = new Schema<ILesson>({
   lesson_name: { type: String, required: true },
-  lessonDetails: { type: String, required: true },
+  lessonDetails: { type: String },
   module_id: { type: Schema.Types.ObjectId, ref: "Module", required: true },
   quiz_ids: { type: Schema.Types.ObjectId, ref: "Quiz" },
   completed_by: [{ type: Schema.Types.ObjectId, ref: "User" }],

@@ -79,7 +79,7 @@ router.get("/lessons", authenticateUser, lessonController.getAllLessons);
 router.get("/lessons/:id", authenticateUser, lessonController.getLessonById);
 router.get("/lessons/:id", authenticateUser, lessonController.getLessonById);
 router.get(
-  "/module-id/:id",
+  "/lessons/module-id/:id",
   authenticateUser,
   lessonController.getLessonByModuleId
 );
