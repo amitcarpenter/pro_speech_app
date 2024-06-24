@@ -57,6 +57,7 @@ router.post(
   authenticateUser,
   userControllers.changePassword
 );
+router.delete("/auth/delete-account", authenticateUser, userControllers.deleteAccount);
 
 //=================================== section ==============================
 router.get("/sections", authenticateUser, sectionController.getSections);

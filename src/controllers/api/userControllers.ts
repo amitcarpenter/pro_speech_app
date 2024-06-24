@@ -787,3 +787,27 @@ export const isPassword = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+// Delete Account 
+export const deleteAccount = async (req: Request, res: Response) => {
+  try {
+    const user_req = req.user as IUser;
+    const user = await User.findById(user_req.id);
+    const deleteAcount = await User.deleteOne({ _id: user?._id });
+    console.log(deleteAcount);
+    if (deleteAcount.deletedCount > 0) {
+      return res.status(500).send({
+        success: true,
+        status: 200,
+        message: "Account Deleted SuccessFully",
+      });
+    }
+  } catch (error: any) {
+    return res.status(500).send({
+      success: false,
+      status: 500,
+      error: error.message,
+    });
+  }
+};
