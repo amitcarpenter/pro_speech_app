@@ -657,7 +657,9 @@ export const signup_google = async (req: Request, res: Response) => {
     if (user) {
       user.name = name || user.name;
       user.googleId = googleId;
-      user.signupMethod = "google";
+      if (user.signupMethod != "traditional") {
+        user.signupMethod = "google";
+      }
       user.isVerified = true;
     } else {
       user = new User({
