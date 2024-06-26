@@ -16,6 +16,7 @@ export const createLesson = async (req: Request, res: Response) => {
     const lessonSchema = Joi.object({
       lesson_name: Joi.string().required(),
       module_id: Joi.string().required(),
+      lessonDetails: Joi.string().optional(),
     });
 
     const { error } = lessonSchema.validate(req.body);

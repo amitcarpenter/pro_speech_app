@@ -9,7 +9,7 @@
     "skipLibCheck": true
   },
   "include": [
-    "./src/**/*.ts",    // Adjust the path based on your project structure
-    "./uploads/**/*"     // Include all files and subfolders in the 'upload' folder
+    "./src/**/*.ts",    
+    "./uploads/**/*"    
   ]
 }

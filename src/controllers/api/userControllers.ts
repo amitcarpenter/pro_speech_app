@@ -15,7 +15,6 @@ const APP_URL = process.env.APP_URL as string;
 export const register = async (req: Request, res: Response) => {
   try {
     console.log("register");
-
     const registerSchema = Joi.object({
       name: Joi.string().min(3).max(30).required(),
       email: Joi.string().email().required(),
@@ -787,7 +786,6 @@ export const isPassword = async (req: Request, res: Response) => {
     });
   }
 };
-
 
 // Delete Account 
 export const deleteAccount = async (req: Request, res: Response) => {
