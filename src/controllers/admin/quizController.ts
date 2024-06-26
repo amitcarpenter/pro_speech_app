@@ -38,7 +38,7 @@ export const createQuiz = async (req: Request, res: Response) => {
         const savedQuiz = await newQuiz.save();
         return res.status(201).json({
             success: true,
-            meessage: "quiz created successfully",
+            message: "quiz created successfully",
             status: 201, quiz: savedQuiz
         });
     } catch (error: any) {
@@ -88,7 +88,7 @@ export const updateQuizById = async (req: Request, res: Response) => {
         }
         return res.status(200).json({
             success: true,
-            meessage: "quiz updated successfully",
+            message: "quiz updated successfully",
             status: 200, updatedQuiz
         });
     } catch (error: any) {
