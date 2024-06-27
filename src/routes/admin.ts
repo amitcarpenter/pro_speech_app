@@ -25,6 +25,27 @@ router.get(
   userControllers.get_user_list
 );
 
+router.get(
+  "/get-user-details/:id",
+  authenticateUser,
+  isAdmin,
+  userControllers.get_user_details
+);
+
+router.delete(
+  "/delete-user-by-id/:id",
+  authenticateUser,
+  isAdmin,
+  userControllers.delete_user_by_id
+);
+
+router.put(
+  "/edit-user-profile/:id",
+  authenticateUser,
+  isAdmin,
+  userControllers.updateUserProfileByAdmin
+);
+
 //==================================== Section ==============================
 router.post(
   "/sections",

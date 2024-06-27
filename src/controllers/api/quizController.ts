@@ -144,7 +144,7 @@ export const submit_quiz = async (req: Request, res: Response) => {
             return res.status(400).json({
                 success: false,
                 status: 400,
-                message: "You have already submitted this lesson"
+                message: "You have already submitted this Quiz"
             });
         }
 
