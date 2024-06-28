@@ -55,10 +55,22 @@ export const updateSection = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { section_name } = req.body;
 
+    const sectionData = await Section.findById(id)
+
+    if (!sectionData) {
+      return res
+        .status(404)
+        .json({ success: false, status: 404, message: "Section Not Found" });
+    }
+
+
+
     let section_image = null;
     if (req.file) {
       console.log(section_image);
       section_image = req.file.filename;
+    } else {
+      section_image = sectionData.section_image
     }
     console.log(req.body);
     console.log(req.file);
