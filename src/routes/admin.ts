@@ -67,6 +67,13 @@ router.delete(
   sectionController.deleteSection
 );
 
+router.get(
+  "/sections-all",
+  authenticateUser,
+  isAdmin,
+  sectionController.getSectionsForAdmin
+);
+
 //==================================== Module ==============================
 router.post(
   "/modules",

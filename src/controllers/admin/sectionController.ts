@@ -115,40 +115,8 @@ export const deleteSection = async (req: Request, res: Response) => {
   }
 };
 
-// export const sidebarshow = async (req: Request, res: Response) => {
-//     try {
-//       // Fetch all sections
-//       const sections = await Section.find({}, { section_name: 1 });
 
-//       // Fetch all modules
-//       const modules = await Module.find({}, { module_name: 1, section_id: 1 });
-
-//       // Prepare section data with modules
-//       const sectionData = sections.map(section => {
-//         // Filter modules for the current section
-//         const sectionModules = modules.filter(module =>
-//           module.section_id.toString() === section._id.toString()
-//         );
-//         // Extract module names
-//         const moduleNames = sectionModules.map(module => module.module_name);
-
-//         return {
-//           section: section.section_name,
-//           modules: moduleNames
-//         };
-//       });
-
-//       return res.status(200).json({
-//         success: true,
-//         status: 200,
-//         message: "Data successfully fetched",
-//         data: sectionData
-//       });
-//     } catch (error: any) {
-//       return res.status(500).json({ success: false, status: 500, error: error.message });
-//     }
-//   };
-
+// Sidebar 
 export const sidebarshow = async (req: Request, res: Response) => {
   try {
     // Fetch all sections
@@ -186,5 +154,157 @@ export const sidebarshow = async (req: Request, res: Response) => {
     return res
       .status(500)
       .json({ success: false, status: 500, error: error.message });
+  }
+};
+
+
+// Get All Section for admin
+
+interface ILesson {
+  _id: Types.ObjectId;
+  lesson_name: string;
+  module_id: Types.ObjectId;
+  quiz_ids: Types.ObjectId;
+  lesstionDetailsId: Types.ObjectId;
+  completed_by: Types.ObjectId[];
+  question_count: number;
+}
+// export const getSectionsForAdmin = async (req: Request, res: Response) => {
+//   try {
+//     // const sections = await Section.find().populate("modules");
+//     const sections = await Section.find()
+//     .populate({
+//       path: "modules",
+//       populate: {
+//         path: "lessons",
+//       },
+//     });
+//     const user_req = req.user as IUser;
+//     const user = await User.findById(user_req.id);
+//     const completedLessons =
+//       user?.completed_lessons.map((id) => id.toString()) ?? [];
+
+//     if (!sections) {
+//       return res
+//         .status(400)
+//         .json({ success: false, status: 400, message: "Sections not found" });
+//     }
+
+//     const sectionsWithCompletion = await Promise.all(
+//       sections.map(async (section) => {
+//         const moduleIds = section.modules.map(
+//           (module: { _id: Types.ObjectId }) => module._id
+//         );
+//         const lessons = (await Lesson.find({
+//           module_id: { $in: moduleIds },
+//         })) as ILesson[];
+//         const totalLessons = lessons.length;
+
+//         // Convert lesson IDs to strings for comparison
+//         const lessonIds = lessons.map((lesson) => lesson._id.toString());
+
+//         // Count completed lessons related to this section
+//         const completedLessonsInSection = lessonIds.filter((lessonId) =>
+//           completedLessons.includes(lessonId)
+//         ).length;
+
+//         // Calculate completion percentage
+//         const completionPercentage =
+//           totalLessons > 0
+//             ? (completedLessonsInSection / totalLessons) * 100
+//             : 0;
+
+//         // Format section image URL
+//         if (section.section_image) {
+//           section.section_image = APP_URL + section.section_image;
+//         }
+
+//         return {
+//           ...section.toObject(),
+//           completionPercentage: completionPercentage.toFixed(2),
+//         };
+//       })
+//     );
+
+//     return res.status(200).json({
+//       success: true,
+//       status: 200,
+//       data: sectionsWithCompletion,
+//     });
+//   } catch (error: any) {
+//     console.error("Error fetching sections:", error);
+//     return res
+//       .status(500)
+//       .json({ success: false, status: 500, error: error.message });
+//   }
+// };
+
+
+export const getSectionsForAdmin = async (req: Request, res: Response) => {
+  try {
+    // Fetch sections and populate modules and lessons
+    const sections = await Section.find().populate({
+      path: "modules",
+      populate: {
+        path: "lessons",
+      },
+    });
+
+    const user_req = req.user as IUser;
+    const user = await User.findById(user_req.id);
+    const completedLessons = user?.completed_lessons.map((id) => id.toString()) ?? [];
+
+    if (!sections) {
+      return res.status(400).json({ success: false, status: 400, message: "Sections not found" });
+    }
+
+    const sectionsWithCompletion = await Promise.all(
+      sections.map(async (section) => {
+        const moduleIds = section.modules.map((module: { _id: Types.ObjectId }) => module._id);
+
+        // Fetch lessons related to modules in the section
+        const lessons = (await Lesson.find({ module_id: { $in: moduleIds } })) as ILesson[];
+        const totalLessons = lessons.length;
+
+        // Convert lesson IDs to strings for comparison
+        const lessonIds = lessons.map((lesson) => lesson._id.toString());
+
+        // Count completed lessons related to this section
+        const completedLessonsInSection = lessonIds.filter((lessonId) =>
+          completedLessons.includes(lessonId)
+        ).length;
+
+        // Calculate completion percentage
+        const completionPercentage = totalLessons > 0 ? (completedLessonsInSection / totalLessons) * 100 : 0;
+
+        // Format section image URL
+        if (section.section_image) {
+          section.section_image = APP_URL + section.section_image;
+        }
+
+        // Format module image URLs
+        const formattedModules = section.modules.map((module: any) => {
+          if (module.module_image) {
+            module.module_image = APP_URL + module.module_image;
+          }
+          return module;
+        });
+
+        return {
+          ...section.toObject(),
+          modules: formattedModules,
+          completionPercentage: completionPercentage.toFixed(2),
+        };
+      })
+    );
+
+    return res.status(200).json({
+      success: true,
+      status: 200,
+      data: sectionsWithCompletion,
+    });
+  } catch (error: any) {
+    console.error("Error fetching sections:", error);
+    return res.status(500).json({ success: false, status: 500, error: error.message });
   }
 };
