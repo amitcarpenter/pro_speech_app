@@ -15,3 +15,4 @@ export const upload = multer({ storage: storage });
 export const uploadProfileImage = upload.single('profileImage');
 export const uploadSectionImage = upload.single('section_image');
 export const uploadModuleImage = upload.single('module_image');
+export const uploadFile = upload.single('file');

@@ -17,6 +17,10 @@ export const get_user_list = async (req: Request, res: Response) => {
     if (!user_list) {
       return handleError(res, 404, "user list not found");
     }
+
+    user_list.map((user) => {
+      user.profile.profileImage = APP_URL + user.profile.profileImage
+    })
     return res.status(200).json({
       success: true,
       status: 200,
@@ -45,6 +49,14 @@ export const get_user_details = async (req: Request, res: Response) => {
 
     // User Information
     const userData = await User.findOne({ _id: id });
+    if (!userData) {
+      return res.status(400).json({
+        success: false,
+        status: 400,
+        message: 'User Not Found',
+      });
+    }
+    userData.profile.profileImage = APP_URL + userData.profile.profileImage
 
     // Section Information
     const sections = await Section.find().populate("modules");
@@ -212,6 +224,14 @@ export const updateUserProfileByAdmin = async (req: Request, res: Response) => {
       gender: Joi.string().valid("Male", "Female", "Other").optional(),
       phone: Joi.string().min(10).max(15).optional(),
     });
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        status: 400,
+        message: 'Please upload a Profile Image',
+      });
+    }
 
     const { error } = updateProfileSchema.validate(req.body);
     if (error) {

@@ -1,8 +1,5 @@
 import express from "express";
-import { upload } from "../services/uploadImage";
-import { uploadProfileImage } from "../services/uploadImage";
-import { uploadModuleImage } from "../services/uploadImage";
-import { uploadSectionImage } from "../services/uploadImage";
+import { upload, uploadModuleImage, uploadSectionImage, uploadFile } from "../services/uploadImage";
 import { authenticateUser, isAdmin } from "../middlewares/auth";
 
 //==================================== Import Controller ==============================
@@ -11,6 +8,7 @@ import * as userControllers from "../controllers/admin/userController";
 import * as sectionController from "../controllers/admin/sectionController";
 import * as moduleController from "../controllers/admin/moduleController";
 import * as lessonController from "../controllers/admin/lessonController";
+import * as fileController from "../controllers/admin/fileController";
 import * as quizController from "../controllers/admin/quizController";
 import * as privacyPoliciesController from "../controllers/admin/privacyPolicyController";
 import * as termsAndConditionsController from "../controllers/admin/termsAndConditionsController";
@@ -43,6 +41,7 @@ router.put(
   "/edit-user-profile/:id",
   authenticateUser,
   isAdmin,
+  upload.single("profileImage"),
   userControllers.updateUserProfileByAdmin
 );
 
@@ -177,6 +176,44 @@ router.get(
   authenticateUser,
   isAdmin,
   sectionController.sidebarshow
+);
+
+//==================================== File Upload System ==============================
+router.post(
+  "/file/upload",
+  authenticateUser,
+  isAdmin,
+  uploadFile,
+  fileController.uploadFile
+);
+
+router.put(
+  "/file/update/:id",
+  authenticateUser,
+  isAdmin,
+  uploadFile,
+  fileController.updateFile
+);
+
+router.get(
+  "/file/get/:id",
+  authenticateUser,
+  isAdmin,
+  fileController.getFileById
+);
+
+router.get(
+  "/file/get-all",
+  authenticateUser,
+  isAdmin,
+  fileController.getAllFiles
+);
+
+router.delete(
+  "/file/delete/:id",
+  authenticateUser,
+  isAdmin,
+  fileController.deleteFile
 );
 
 export default router;
