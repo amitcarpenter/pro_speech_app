@@ -10,7 +10,9 @@
   },
   "include": [
     "app.ts",
-    "./src/**/*.ts",    
-    "./uploads/**/*"    
+    "./src/**/*.ts", 
+    "package.json",   
+    "package-lock.json",   
+    "./uploads/**/*"   
   ]
 }
