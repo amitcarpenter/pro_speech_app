@@ -93,8 +93,6 @@ import Score from "../../models/Score";
 //   }
 // };
 
-
-
 export const get_score_leaderboard = async (req: Request, res: Response) => {
   try {
     const user_req = req.user as IUser;
