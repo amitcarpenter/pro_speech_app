@@ -2,7 +2,7 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 interface IQuestion {
-  text: string;  
+  text: string;
   options: string[];
   correctOption: string;
 }
@@ -14,13 +14,13 @@ interface IQuiz extends Document {
 }
 
 const questionSchema = new Schema<IQuestion>({
-  text: { type: String, required: true },  
+  text: { type: String, required: true },
   options: { type: [String], required: true },
   correctOption: { type: String, required: true }
 });
 
 const quizSchema = new Schema<IQuiz>({
-  quiz_name: { type: String, required: true },
+  quiz_name: { type: String },
   questions: { type: [questionSchema], required: true },
   lesson_id: { type: Schema.Types.ObjectId, ref: 'Lesson', required: true }
 });
