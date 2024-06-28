@@ -8,7 +8,6 @@ import Quiz from '../../models/Quiz';
 // Create a new quiz
 export const createQuiz = async (req: Request, res: Response) => {
     const quizSchema = Joi.object({
-        quiz_name: Joi.string().required(),
         questions: Joi.array().items(
             Joi.object({
                 text: Joi.string().required(),
