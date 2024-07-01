@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
+import Lesson from "../../models/Lesson";
 import Section from "../../models/Section";
 import User, { IUser } from "../../models/User";
-import Joi from "joi";
-import Lesson from "../../models/Lesson";
+
 
 const APP_URL = process.env.APP_URL as string;
 
@@ -19,55 +19,195 @@ interface ILesson {
 }
 
 // Get All Section
+// export const getSections = async (req: Request, res: Response) => {
+//   try {
+//     const sections = await Section.find().populate("modules");
+//     const user_req = req.user as IUser;
+//     const user = await User.findById(user_req.id);
+//     const completedLessons =
+//       user?.completed_lessons.map((id) => id.toString()) ?? [];
+
+//     if (!sections) {
+//       return res
+//         .status(400)
+//         .json({ success: false, status: 400, message: "Sections not found" });
+//     }
+
+//     const sectionsWithCompletion = await Promise.all(
+//       sections.map(async (section) => {
+//         const moduleIds = section.modules.map(
+//           (module: { _id: Types.ObjectId }) => module._id
+//         );
+//         const lessons = (await Lesson.find({
+//           module_id: { $in: moduleIds },
+//         })) as ILesson[];
+//         const totalLessons = lessons.length;
+
+//         // Convert lesson IDs to strings for comparison
+//         const lessonIds = lessons.map((lesson) => lesson._id.toString());
+
+//         // Count completed lessons related to this section
+//         const completedLessonsInSection = lessonIds.filter((lessonId) =>
+//           completedLessons.includes(lessonId)
+//         ).length;
+
+//         // Calculate completion percentage
+//         const completionPercentage =
+//           totalLessons > 0
+//             ? (completedLessonsInSection / totalLessons) * 100
+//             : 0;
+
+//         // Format section image URL
+//         if (section.section_image) {
+//           section.section_image = APP_URL + section.section_image;
+//         }
+
+//         return {
+//           ...section.toObject(),
+//           completionPercentage: completionPercentage.toFixed(2),
+//         };
+//       })
+//     );
+
+//     return res.status(200).json({
+//       success: true,
+//       status: 200,
+//       data: sectionsWithCompletion,
+//     });
+//   } catch (error: any) {
+//     console.error("Error fetching sections:", error);
+//     return res
+//       .status(500)
+//       .json({ success: false, status: 500, error: error.message });
+//   }
+// };
+
+
+
 export const getSections = async (req: Request, res: Response) => {
   try {
-    const sections = await Section.find().populate("modules");
     const user_req = req.user as IUser;
-    const user = await User.findById(user_req.id);
-    const completedLessons =
-      user?.completed_lessons.map((id) => id.toString()) ?? [];
 
-    if (!sections) {
-      return res
-        .status(400)
-        .json({ success: false, status: 400, message: "Sections not found" });
-    }
-
-    const sectionsWithCompletion = await Promise.all(
-      sections.map(async (section) => {
-        const moduleIds = section.modules.map(
-          (module: { _id: Types.ObjectId }) => module._id
-        );
-        const lessons = (await Lesson.find({
-          module_id: { $in: moduleIds },
-        })) as ILesson[];
-        const totalLessons = lessons.length;
-
-        // Convert lesson IDs to strings for comparison
-        const lessonIds = lessons.map((lesson) => lesson._id.toString());
-
-        // Count completed lessons related to this section
-        const completedLessonsInSection = lessonIds.filter((lessonId) =>
-          completedLessons.includes(lessonId)
-        ).length;
-
-        // Calculate completion percentage
-        const completionPercentage =
-          totalLessons > 0
-            ? (completedLessonsInSection / totalLessons) * 100
-            : 0;
-
-        // Format section image URL
-        if (section.section_image) {
-          section.section_image = APP_URL + section.section_image;
+    const aggregationPipeline = [
+      // Lookup modules
+      {
+        $lookup: {
+          from: 'modules',
+          localField: 'modules',
+          foreignField: '_id',
+          as: 'modules'
         }
+      },
+      // Unwind modules to get lessons
+      { $unwind: '$modules' },
+      // Lookup lessons for each module
+      {
+        $lookup: {
+          from: 'lessons',
+          localField: 'modules._id',
+          foreignField: 'module_id',
+          as: 'lessons'
+        }
+      },
+      // Format module image URL
+      {
+        $addFields: {
+          'modules.module_image': {
+            $cond: [
+              { $ne: ['$modules.module_image', null] },
+              { $concat: [APP_URL, '$modules.module_image'] },
+              null
+            ]
+          }
+        }
+      },
+      // Group back to sections
+      {
+        $group: {
+          _id: '$_id',
+          section_name: { $first: '$section_name' },
+          section_image: { $first: '$section_image' },
+          modules: { $push: '$modules' },
+          lessons: { $push: '$lessons' }
+        }
+      },
+      // Flatten lessons array
+      {
+        $addFields: {
+          lessons: {
+            $reduce: {
+              input: '$lessons',
+              initialValue: [],
+              in: { $concatArrays: ['$$value', '$$this'] }
+            }
+          }
+        }
+      },
+      // Lookup user's completed lessons
+      {
+        $lookup: {
+          from: 'users',
+          let: { lessonIds: '$lessons._id' },
+          pipeline: [
+            { $match: { _id: user_req.id } },
+            { $project: { completed_lessons: 1 } },
+            {
+              $addFields: {
+                completedLessonCount: {
+                  $size: {
+                    $setIntersection: ['$completed_lessons', '$$lessonIds']
+                  }
+                }
+              }
+            }
+          ],
+          as: 'userCompletion'
+        }
+      },
+      // Calculate completion percentage
+      {
+        $addFields: {
+          totalLessons: { $size: '$lessons' },
+          completedLessons: { $arrayElemAt: ['$userCompletion.completedLessonCount', 0] },
+          completionPercentage: {
+            $cond: [
+              { $gt: [{ $size: '$lessons' }, 0] },
+              {
+                $multiply: [
+                  { $divide: [{ $arrayElemAt: ['$userCompletion.completedLessonCount', 0] }, { $size: '$lessons' }] },
+                  100
+                ]
+              },
+              0
+            ]
+          }
+        }
+      },
+      // Format section image URL
+      {
+        $addFields: {
+          section_image: {
+            $cond: [
+              { $ne: ['$section_image', null] },
+              { $concat: [APP_URL, '$section_image'] },
+              null
+            ]
+          }
+        }
+      },
+      // Final projection
+      {
+        $project: {
+          _id: 1,
+          section_name: 1,
+          section_image: 1,
+          modules: 1,
+          completionPercentage: { $round: ['$completionPercentage', 2] }
+        }
+      }
+    ];
 
-        return {
-          ...section.toObject(),
-          completionPercentage: completionPercentage.toFixed(2),
-        };
-      })
-    );
+    const sectionsWithCompletion = await Section.aggregate(aggregationPipeline);
 
     return res.status(200).json({
       success: true,
@@ -76,8 +216,6 @@ export const getSections = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error("Error fetching sections:", error);
-    return res
-      .status(500)
-      .json({ success: false, status: 500, error: error.message });
+    return res.status(500).json({ success: false, status: 500, error: error.message });
   }
 };

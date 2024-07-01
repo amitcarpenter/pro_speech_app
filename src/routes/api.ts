@@ -1,8 +1,5 @@
 import express from "express";
-import { upload } from "../services/uploadImage";
 import { uploadProfileImage } from "../services/uploadImage";
-import { uploadModuleImage } from "../services/uploadImage";
-import { uploadSectionImage } from "../services/uploadImage";
 import { authenticateUser, isAdmin } from "../middlewares/auth";
 
 //==================================== Import Controller ==============================

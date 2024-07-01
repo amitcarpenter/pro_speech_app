@@ -1,11 +1,10 @@
+import Joi from "joi";
+import bcrypt from "bcryptjs";
 import { Request, Response } from "express";
 import User, { IUser } from "../../models/User";
-import bcrypt from "bcryptjs";
-import Joi from "joi";
-
-import { generateOTP, send_otp_on_email } from "../../services/otpService";
 import { generateAccessToken } from "../../utils/jwt";
-import { handleError } from "../../utils/errorHandle";
+import { deleteImageFile } from "../../services/deleteImages";
+import { generateOTP, send_otp_on_email } from "../../services/otpService";
 
 const APP_URL = process.env.APP_URL as string;
 
@@ -65,14 +64,14 @@ export const register = async (req: Request, res: Response) => {
     });
 
     await newUser.save();
-    await send_otp_on_email({ to: email, otp });
 
-    return res.status(201).json({
+    res.status(201).json({
       success: true,
       status: 201,
       message: "User registered successfully. Please verify your account.",
       otp: otp,
     });
+    await send_otp_on_email({ to: email, otp });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
@@ -166,13 +165,13 @@ export const resendOTPByEmail = async (req: Request, res: Response) => {
       { otp: otp, otpExpires: otpExpires },
       { new: true, upsert: true }
     );
-    await send_otp_on_email({ to: email, otp });
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       status: 200,
       message: "OTP resent successfully",
       otp: otp,
     });
+    await send_otp_on_email({ to: email, otp });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
@@ -311,6 +310,7 @@ export const updateProfile = async (req: Request, res: Response) => {
     const user_req = req.user as IUser;
     const user = await User.findById(user_req.id);
 
+
     if (user) {
       if (fullName) user.profile.fullName = fullName;
       if (nickName) user.profile.nickName = nickName;
@@ -322,8 +322,11 @@ export const updateProfile = async (req: Request, res: Response) => {
       }
       if (req.file) {
         user.profile.profileImage = req.file.filename;
-        console.log(req.file.filename);
+      } else {
+        user.profile.profileImage = user.profile.profileImage
       }
+      const file_name = "profile.profileImage"
+      await deleteImageFile(User, user_req.id, file_name)
 
       await user.save();
       return res.status(200).json({
@@ -375,14 +378,14 @@ export const forgotPassword = async (req: Request, res: Response) => {
     user.resetPasswordOTP = otp;
     user.resetPasswordOTPExpires = new Date(Date.now() + 10 * 60 * 1000);
     await user.save();
-    await send_otp_on_email({ to: email, otp });
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       status: 200,
       message: "OTP sent successfully",
       otp: otp,
     });
+    await send_otp_on_email({ to: email, otp });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
@@ -565,6 +568,7 @@ export const changePassword = async (req: Request, res: Response) => {
 // Update profile image
 export const profile_image_update = async (req: Request, res: Response) => {
   try {
+    console.log("hello")
     const user_req = req.user as IUser;
     const user = await User.findById(user_req.id);
     if (!user) {
@@ -576,6 +580,9 @@ export const profile_image_update = async (req: Request, res: Response) => {
     }
     if (req.file) {
       user.profile.profileImage = req.file.filename;
+
+      const file_name = "profile.profileImage"
+      await deleteImageFile(User, user_req.id, file_name)
       await user.save();
       return res.status(200).json({
         success: true,
@@ -612,6 +619,8 @@ export const remove_profile_image = async (req: Request, res: Response) => {
       });
     }
     user.profile.profileImage = null;
+    const file_name = "profile.profileImage"
+    await deleteImageFile(User, user_req.id, file_name)
     await user.save();
     return res.status(200).json({
       success: true,
@@ -792,6 +801,16 @@ export const deleteAccount = async (req: Request, res: Response) => {
   try {
     const user_req = req.user as IUser;
     const user = await User.findById(user_req.id);
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        status: 400,
+        message: "User Not Found"
+      })
+    }
+
+    const file_name = "profile.profileImage"
+    await deleteImageFile(User, user_req.id, file_name)
     const deleteAcount = await User.deleteOne({ _id: user?._id });
     console.log(deleteAcount);
     if (deleteAcount.deletedCount > 0) {

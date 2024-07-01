@@ -6,6 +6,7 @@ import { handleError } from "../../utils/errorHandle";
 import Lesson from "../../models/Lesson";
 import Score from "../../models/Score";
 import Joi from "joi";
+import { deleteImageFile } from "../../services/deleteImages";
 
 const APP_URL = process.env.APP_URL as string;
 
@@ -199,6 +200,8 @@ export const get_user_details = async (req: Request, res: Response) => {
 export const delete_user_by_id = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const file_name = "profile.profileImage"
+    await deleteImageFile(User, id, file_name)
     const user_delete = await User.findByIdAndDelete(id);
     console.log(user_delete);
     if (!user_delete) {
@@ -225,13 +228,7 @@ export const updateUserProfileByAdmin = async (req: Request, res: Response) => {
       phone: Joi.string().min(10).max(15).optional(),
     });
 
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        status: 400,
-        message: 'Please upload a Profile Image',
-      });
-    }
+
 
     const { error } = updateProfileSchema.validate(req.body);
     if (error) {
@@ -260,7 +257,12 @@ export const updateUserProfileByAdmin = async (req: Request, res: Response) => {
       if (req.file) {
         user.profile.profileImage = req.file.filename;
         console.log(req.file.filename);
+      } else {
+        user.profile.profileImage = user.profile.profileImage
       }
+
+      const file_name = "profile.profileImage"
+      await deleteImageFile(User, id, file_name)
 
       await user.save();
       return res.status(200).json({
@@ -282,4 +284,4 @@ export const updateUserProfileByAdmin = async (req: Request, res: Response) => {
       error: error.message,
     });
   }
-};
+};  

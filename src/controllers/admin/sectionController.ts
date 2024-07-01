@@ -5,6 +5,7 @@ import User, { IUser } from "../../models/User";
 import Joi from "joi";
 import Lesson from "../../models/Lesson";
 import Module, { IModule } from "../../models/Module";
+import { deleteImageFile } from "../../services/deleteImages";
 
 const APP_URL = process.env.APP_URL as string;
 
@@ -62,10 +63,9 @@ export const updateSection = async (req: Request, res: Response) => {
         .status(404)
         .json({ success: false, status: 404, message: "Section Not Found" });
     }
-
-
-
     let section_image = null;
+    const file_name = "section_image"
+    await deleteImageFile(Section, id, file_name)
     if (req.file) {
       console.log(section_image);
       section_image = req.file.filename;
@@ -114,6 +114,9 @@ export const deleteSection = async (req: Request, res: Response) => {
         .status(404)
         .json({ success: false, status: 404, message: "Section not found" });
     }
+
+    const file_name = "section_image"
+    await deleteImageFile(Section, id, file_name)
 
     return res.status(200).json({
       success: true,
@@ -171,7 +174,6 @@ export const sidebarshow = async (req: Request, res: Response) => {
 
 
 // Get All Section for admin
-
 interface ILesson {
   _id: Types.ObjectId;
   lesson_name: string;
@@ -181,77 +183,6 @@ interface ILesson {
   completed_by: Types.ObjectId[];
   question_count: number;
 }
-// export const getSectionsForAdmin = async (req: Request, res: Response) => {
-//   try {
-//     // const sections = await Section.find().populate("modules");
-//     const sections = await Section.find()
-//     .populate({
-//       path: "modules",
-//       populate: {
-//         path: "lessons",
-//       },
-//     });
-//     const user_req = req.user as IUser;
-//     const user = await User.findById(user_req.id);
-//     const completedLessons =
-//       user?.completed_lessons.map((id) => id.toString()) ?? [];
-
-//     if (!sections) {
-//       return res
-//         .status(400)
-//         .json({ success: false, status: 400, message: "Sections not found" });
-//     }
-
-//     const sectionsWithCompletion = await Promise.all(
-//       sections.map(async (section) => {
-//         const moduleIds = section.modules.map(
-//           (module: { _id: Types.ObjectId }) => module._id
-//         );
-//         const lessons = (await Lesson.find({
-//           module_id: { $in: moduleIds },
-//         })) as ILesson[];
-//         const totalLessons = lessons.length;
-
-//         // Convert lesson IDs to strings for comparison
-//         const lessonIds = lessons.map((lesson) => lesson._id.toString());
-
-//         // Count completed lessons related to this section
-//         const completedLessonsInSection = lessonIds.filter((lessonId) =>
-//           completedLessons.includes(lessonId)
-//         ).length;
-
-//         // Calculate completion percentage
-//         const completionPercentage =
-//           totalLessons > 0
-//             ? (completedLessonsInSection / totalLessons) * 100
-//             : 0;
-
-//         // Format section image URL
-//         if (section.section_image) {
-//           section.section_image = APP_URL + section.section_image;
-//         }
-
-//         return {
-//           ...section.toObject(),
-//           completionPercentage: completionPercentage.toFixed(2),
-//         };
-//       })
-//     );
-
-//     return res.status(200).json({
-//       success: true,
-//       status: 200,
-//       data: sectionsWithCompletion,
-//     });
-//   } catch (error: any) {
-//     console.error("Error fetching sections:", error);
-//     return res
-//       .status(500)
-//       .json({ success: false, status: 500, error: error.message });
-//   }
-// };
-
-
 export const getSectionsForAdmin = async (req: Request, res: Response) => {
   try {
     // Fetch sections and populate modules and lessons

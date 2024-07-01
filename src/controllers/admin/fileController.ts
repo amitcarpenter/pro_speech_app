@@ -1,6 +1,7 @@
 import Joi from "joi";
 import File from "../../models/File";
 import { Request, Response } from "express";
+import { deleteImageFile } from "../../services/deleteImages";
 
 
 const APP_URL = process.env.APP_URL as string;
@@ -40,6 +41,8 @@ export const uploadFile = async (req: Request, res: Response) => {
         let file_url = req.file.filename;
 
         const newFile = new File({ file_name, file_url, file_type });
+
+
         await newFile.save();
 
         return res.status(201).json({
@@ -89,6 +92,8 @@ export const updateFile = async (req: Request, res: Response) => {
             file_type = fileData?.file_type
         }
 
+        const file_name_url = "file_url"
+        await deleteImageFile(File, req.params.id, file_name_url)
         const updatedFile = await File.findByIdAndUpdate(id, { file_name, file_url, file_type }, {
             new: true,
         });
@@ -119,6 +124,9 @@ export const updateFile = async (req: Request, res: Response) => {
 export const deleteFile = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
+
+        const file_name_url = "file_url"
+        await deleteImageFile(File, req.params.id, file_name_url)
         const deletedFile = await File.findByIdAndDelete(id);
         if (!deletedFile) {
             return res.status(404).json({
@@ -127,6 +135,7 @@ export const deleteFile = async (req: Request, res: Response) => {
                 message: "File not found",
             });
         }
+
 
         return res.status(200).json({
             success: true,

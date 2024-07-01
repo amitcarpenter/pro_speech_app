@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import Joi from 'joi';
-import  { Types } from 'mongoose';
+import { Types } from 'mongoose';
 import Module from '../../models/Module';
 import Lesson from '../../models/Lesson';
 import Section from '../../models/Section';
+import { deleteImageFile } from '../../services/deleteImages';
 
 const APP_URL = process.env.APP_URL as string
 
@@ -44,7 +45,7 @@ export const createModule = async (req: Request, res: Response) => {
         const savedModule = await newModule.save();
         const updatedSection = await Section.findByIdAndUpdate(
             section_id,
-            { $push: { modules: savedModule._id } }, 
+            { $push: { modules: savedModule._id } },
             { new: true }
         );
 
@@ -67,10 +68,25 @@ export const updateModuleById = async (req: Request, res: Response) => {
     try {
         const { module_name } = req.body;
 
+        const updateModuleData = await Module.findById(req.params.id)
+        if (!updateModuleData) {
+            return res.status(404).json({
+                success: true,
+                status: 404,
+                message: "Module Not Found"
+            })
+        }
+
         let module_image = null;
         if (req.file) {
             module_image = req.file.filename
+        } else {
+            module_image = updateModuleData.module_image
         }
+
+        const file_name = "module_image"
+        await deleteImageFile(Module, req.params.id, file_name)
+
         const updatedModule = await Module.findByIdAndUpdate(
             req.params.id,
             {
@@ -98,11 +114,14 @@ export const updateModuleById = async (req: Request, res: Response) => {
 // Delete module by id
 export const deleteModuleById = async (req: Request, res: Response) => {
     try {
+        const { id } = req.params
         const deletedModule = await Module.findByIdAndDelete(req.params.id);
         console.log(deletedModule)
         if (!deletedModule) {
             return res.status(404).json({ success: false, status: 404, message: 'Module not found' });
         }
+        const file_name = "section_image"
+        await deleteImageFile(Section, id, file_name)
         return res.status(200).json({
             success: true,
             status: 200,
