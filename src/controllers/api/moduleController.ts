@@ -1,9 +1,7 @@
 import { Request, Response } from 'express';
-import Joi from 'joi';
-import  { Types } from 'mongoose';
 import Module from '../../models/Module';
 import Lesson from '../../models/Lesson';
-import Section from '../../models/Section';
+
 
 const APP_URL = process.env.APP_URL as string
 
@@ -70,5 +68,9 @@ export const getModuleBySectionId = async (req: Request, res: Response) => {
         });
     }
 };
+
+
+
+
 
 

@@ -4,12 +4,21 @@ import PrivacyPolicy from '../../models/PrivacyPolicy';
 // Create a new Privacy Policy
 export const createPrivacyPolicy = async (req: Request, res: Response) => {
     try {
-        const { title, subTitle, content } = req.body;
+        const { title, subTitle, content, html } = req.body;
+
+        if (!html) {
+            return res.status(400).json({
+                success: false,
+                status: 400,
+                message: "HTML Not Provided"
+            })
+        }
 
         const newPrivacyPolicy = new PrivacyPolicy({
             title,
             subTitle,
             content,
+            html
         });
 
         const savedPrivacyPolicy = await newPrivacyPolicy.save();
@@ -48,8 +57,16 @@ export const getAllPrivacyPolicies = async (req: Request, res: Response) => {
 // Update a Privacy Policy by ID
 export const updatePrivacyPolicy = async (req: Request, res: Response) => {
     try {
-        const { title, subTitle, content } = req.body;
+        const { title, subTitle, content, html } = req.body;
         const privacyPolicy = await PrivacyPolicy.findOne();
+
+        if (!html) {
+            return res.status(400).json({
+                success: false,
+                status: 400,
+                message: "HTML Not Provided"
+            })
+        }
 
         if (!privacyPolicy) {
             return res.status(404).json({
@@ -62,6 +79,7 @@ export const updatePrivacyPolicy = async (req: Request, res: Response) => {
         privacyPolicy.title = title;
         privacyPolicy.subTitle = subTitle;
         privacyPolicy.content = content;
+        privacyPolicy.html = html;
 
         const updatedPrivacyPolicy = await privacyPolicy.save();
 

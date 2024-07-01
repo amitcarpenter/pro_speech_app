@@ -125,14 +125,6 @@ export const get_user_details = async (req: Request, res: Response) => {
       select: "lesson_name",
     });
 
-    // if (!scoreData.length) {
-    //   return res.status(404).json({
-    //     success: false,
-    //     status: 404,
-    //     message: "No score data found for the user",
-    //   });
-    // }
-
     // Calculate total scores and total questions
     const totalScores = scoreData.reduce(
       (sum, score) => sum + score.score_number,

@@ -24,8 +24,15 @@ export const getTermsCondition = async (req: Request, res: Response) => {
 // Create Terms and Conditions
 export const createTermsCondition = async (req: Request, res: Response) => {
     try {
-        const { title, subTitle, content } = req.body;
-        const newTermsCondition = new TermsCondition({ title, subTitle, content });
+        const { title, subTitle, content, html } = req.body;
+        if (!html) {
+            return res.status(400).json({
+                success: false,
+                status: 400,
+                message: "HTML Not Provided"
+            })
+        }
+        const newTermsCondition = new TermsCondition({ title, subTitle, content, html });
         const savedTermsCondition = await newTermsCondition.save();
         return res.status(201).json({ success: true, status: 201, data: savedTermsCondition });
     } catch (error: any) {
@@ -37,7 +44,14 @@ export const createTermsCondition = async (req: Request, res: Response) => {
 // Update Terms and Conditions by ID
 export const updateTermsCondition = async (req: Request, res: Response) => {
     try {
-        const { title, subTitle, content } = req.body;
+        const { title, subTitle, content, html } = req.body;
+        if (!html) {
+            return res.status(400).json({
+                success: false,
+                status: 400,
+                message: "HTML Not Provided"
+            })
+        }
         const termsCondition = await TermsCondition.findOne();
         if (!termsCondition) {
             return res.status(404).json({ success: false, status: 404, message: 'Terms and Conditions not found' });
@@ -45,6 +59,7 @@ export const updateTermsCondition = async (req: Request, res: Response) => {
         termsCondition.title = title;
         termsCondition.subTitle = subTitle;
         termsCondition.content = content;
+        termsCondition.html = html;
 
         const updatedTermsCondition = await termsCondition.save();
 
