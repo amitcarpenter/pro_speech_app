@@ -133,7 +133,7 @@ export const deleteSection = async (req: Request, res: Response) => {
 export const sidebarshow = async (req: Request, res: Response) => {
   try {
     // Fetch all sections
-    const sections: ISection[] = await Section.find({}, { section_name: 1 });
+    const sections: ISection[] = await Section.find({}, { section_name: 1 }).sort({ _id: 1 });
 
     // Fetch all modules
     const modules: IModule[] = await Module.find(
