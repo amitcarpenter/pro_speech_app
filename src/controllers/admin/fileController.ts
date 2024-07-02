@@ -87,13 +87,13 @@ export const updateFile = async (req: Request, res: Response) => {
         if (req.file) {
             file_url = req.file.filename
             file_type = req.file.mimetype;
+
+            const file_name_url = "file_url"
+            await deleteImageFile(File, req.params.id, file_name_url)
         } else {
             file_url = fileData?.file_url
             file_type = fileData?.file_type
         }
-
-        const file_name_url = "file_url"
-        await deleteImageFile(File, req.params.id, file_name_url)
         const updatedFile = await File.findByIdAndUpdate(id, { file_name, file_url, file_type }, {
             new: true,
         });

@@ -13,7 +13,9 @@ const APP_URL = process.env.APP_URL as string;
 // Get User List
 export const get_user_list = async (req: Request, res: Response) => {
   try {
-    const user_list = await User.find({ role: { $ne: "admin" } });
+    // const user_list = await User.find({ role: { $ne: "admin" } });
+    const user_list = await User.find({ role: { $ne: "admin" } }).sort({ createdAt: -1 });
+
 
     if (!user_list) {
       return handleError(res, 404, "user list not found");
@@ -255,12 +257,11 @@ export const updateUserProfileByAdmin = async (req: Request, res: Response) => {
       if (req.file) {
         user.profile.profileImage = req.file.filename;
         console.log(req.file.filename);
+        const file_name = "profile.profileImage"
+        await deleteImageFile(User, id, file_name)
       } else {
         user.profile.profileImage = user.profile.profileImage
       }
-
-      const file_name = "profile.profileImage"
-      await deleteImageFile(User, id, file_name)
 
       await user.save();
       return res.status(200).json({

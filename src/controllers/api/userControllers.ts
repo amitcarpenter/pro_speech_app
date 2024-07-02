@@ -322,11 +322,12 @@ export const updateProfile = async (req: Request, res: Response) => {
       }
       if (req.file) {
         user.profile.profileImage = req.file.filename;
+        const file_name = "profile.profileImage"
+        await deleteImageFile(User, user_req.id, file_name)
       } else {
         user.profile.profileImage = user.profile.profileImage
       }
-      const file_name = "profile.profileImage"
-      await deleteImageFile(User, user_req.id, file_name)
+    
 
       await user.save();
       return res.status(200).json({

@@ -80,12 +80,12 @@ export const updateModuleById = async (req: Request, res: Response) => {
         let module_image = null;
         if (req.file) {
             module_image = req.file.filename
+
+            const file_name = "module_image"
+            await deleteImageFile(Module, req.params.id, file_name)
         } else {
             module_image = updateModuleData.module_image
         }
-
-        const file_name = "module_image"
-        await deleteImageFile(Module, req.params.id, file_name)
 
         const updatedModule = await Module.findByIdAndUpdate(
             req.params.id,

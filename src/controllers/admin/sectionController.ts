@@ -62,9 +62,9 @@ export const updateSection = async (req: Request, res: Response) => {
         .json({ success: false, status: 404, message: "Section Not Found" });
     }
     let section_image = null;
-    const file_name = "section_image"
-    await deleteImageFile(Section, id, file_name)
     if (req.file) {
+      const file_name = "section_image"
+      await deleteImageFile(Section, id, file_name)
       console.log(section_image);
       section_image = req.file.filename;
     } else {

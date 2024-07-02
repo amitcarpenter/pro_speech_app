@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Joi from "joi";
+import mongoose from "mongoose";
 
 //==================================== import modles ==============================
 
@@ -114,6 +115,83 @@ export const getLessonByModuleId = async (req: Request, res: Response) => {
   }
 };
 
+// Agregaiton in get lesson by section id
+// export const getLessonByModuleId = async (req: Request, res: Response) => {
+//   try {
+//     const moduleId = req.params.id;
+//     const userId = (req.user as IUser).id;
+
+//     const [user, lessonsWithQuizCount] = await Promise.all([
+//       User.findById(userId).select('completed_lessons'),
+//       Lesson.aggregate([
+//         { $match: { module_id: new mongoose.Types.ObjectId(moduleId) } },
+//         {
+//           $lookup: {
+//             from: 'quizzes',
+//             localField: '_id',
+//             foreignField: 'lesson_id',
+//             as: 'quizzes'
+//           }
+//         },
+//         {
+//           $addFields: {
+//             question_count: {
+//               $reduce: {
+//                 input: '$quizzes',
+//                 initialValue: 0,
+//                 in: { $add: ['$$value', { $size: '$$this.questions' }] }
+//               }
+//             }
+//           }
+//         },
+//         {
+//           $project: {
+//             quizzes: 0
+//           }
+//         },
+//         { $sort: { _id: 1 } }
+//       ])
+//     ]);
+
+//     if (!user) {
+//       return res.status(404).json({
+//         success: false,
+//         status: 404,
+//         message: "User not found.",
+//       });
+//     }
+
+//     if (!lessonsWithQuizCount || lessonsWithQuizCount.length === 0) {
+//       return res.status(404).json({
+//         success: false,
+//         status: 404,
+//         message: "No lessons found for the given module ID.",
+//       });
+//     }
+
+//     const completedLessons = user.completed_lessons || [];
+//     const lessonsWithCompletionStatus = lessonsWithQuizCount.map(lesson => ({
+//       ...lesson,
+//       completed_lesson: completedLessons.some(
+//         completedLessonId => completedLessonId.equals(lesson._id)
+//       )
+//     }));
+
+//     return res.status(200).json({
+//       success: true,
+//       status: 200,
+//       data: lessonsWithCompletionStatus,
+//     });
+
+//   } catch (error: any) {
+//     console.error("Error fetching lessons by module ID:", error);
+//     return res.status(500).json({
+//       success: false,
+//       status: 500,
+//       message: error.message,
+//     });
+//   }
+// };
 
 
 
