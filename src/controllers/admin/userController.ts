@@ -20,7 +20,13 @@ export const get_user_list = async (req: Request, res: Response) => {
     }
 
     user_list.map((user) => {
-      user.profile.profileImage = APP_URL + user.profile.profileImage
+      // user.profile.profileImage = APP_URL + user.profile.profileImage
+      if (
+        user.profile.profileImage &&
+        !user.profile.profileImage.startsWith("http")
+      ) {
+        user.profile.profileImage = APP_URL + user.profile.profileImage;
+      }
     })
     return res.status(200).json({
       success: true,
