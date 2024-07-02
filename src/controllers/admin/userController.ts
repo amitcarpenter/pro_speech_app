@@ -50,6 +50,7 @@ interface ILesson {
   completed_by: Types.ObjectId[];
   question_count: number;
 }
+
 export const get_user_details = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
