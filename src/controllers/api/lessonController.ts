@@ -53,7 +53,6 @@ export const getLessonById = async (req: Request, res: Response) => {
 // Get Lesson by section id
 export const getLessonByModuleId = async (req: Request, res: Response) => {
   try {
-    console.log("hellllllllllllllllllllllllllllllllllllllll");
     const moduleId = req.params.id;
     const user_req = req.user as IUser;
     const user = await User.findById(user_req.id);
