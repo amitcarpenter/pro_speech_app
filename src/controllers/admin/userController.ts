@@ -65,7 +65,9 @@ export const get_user_details = async (req: Request, res: Response) => {
         message: 'User Not Found',
       });
     }
-    userData.profile.profileImage = APP_URL + userData.profile.profileImage
+    if (userData.profile.profileImage) {
+      userData.profile.profileImage = APP_URL + userData.profile.profileImage
+    }
 
     // Section Information
     const sections = await Section.find().populate("modules");
