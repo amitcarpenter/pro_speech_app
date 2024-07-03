@@ -31,8 +31,8 @@ export const send_otp_on_email = async ({ to, otp }: SendOtpEmailOptions): Promi
         from: EMAIL_USER,
         to,
         subject: 'Your Verification OTP Code',
-        text: `Your OTP code is ${otp}. Please use this to verify your account.`,
-        html: `<p>Your OTP code is <b>${otp}</b>. Please use this to verify your account.</p>`
+        text: `Your OTP code is ${otp}. .`,
+        html: `<p>Your OTP code is <b>${otp}</b>.</p>`
     };
 
     try {
