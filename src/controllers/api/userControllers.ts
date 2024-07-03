@@ -468,7 +468,7 @@ export const changePasswordByEmail = async (req: Request, res: Response) => {
   try {
     const changePasswordByEmailSchema = Joi.object({
       email: Joi.string().email().required(),
-      password: Joi.string().min(6).required(),
+      password: Joi.string().min(8).required(),
     });
     const { error } = changePasswordByEmailSchema.validate(req.body);
     if (error) {
@@ -515,7 +515,7 @@ export const changePassword = async (req: Request, res: Response) => {
   try {
     const changePasswordSchema = Joi.object({
       currentPassword: Joi.string().required(),
-      newPassword: Joi.string().min(6).required(),
+      newPassword: Joi.string().min(8).required(),
     });
     const { error } = changePasswordSchema.validate(req.body);
     if (error) {
