@@ -263,7 +263,13 @@ export const updateUserProfileByAdmin = async (req: Request, res: Response) => {
         const file_name = "profile.profileImage"
         await deleteImageFile(User, id, file_name)
       } else {
-        user.profile.profileImage = user.profile.profileImage
+        if (
+          user.profile.profileImage &&
+          !user.profile.profileImage.startsWith("http")
+        ) {
+          user.profile.profileImage = APP_URL + user.profile.profileImage;
+        }
+        // user.profile.profileImage = user.profile.profileImage
       }
 
       await user.save();
