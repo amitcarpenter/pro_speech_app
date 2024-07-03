@@ -111,14 +111,12 @@ router.get(
 //==================================== Privacy Policy ==============================
 router.get(
   "/privacy-policy",
-  authenticateUser,
   privacyPoliciesController.getAllPrivacyPolicies
 );
 
-//==================================== Privacy Policy ==============================
+//==================================== Terms and Conditions ==============================
 router.get(
   "/terms-and-conditions",
-  authenticateUser,
   termsAndConditionsController.getTermsCondition
 );
 
