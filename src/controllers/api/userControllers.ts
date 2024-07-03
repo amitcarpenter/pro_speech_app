@@ -333,7 +333,7 @@ export const updateProfile = async (req: Request, res: Response) => {
         }
         // user.profile.profileImage = user.profile.profileImage
       }
-    
+
 
       await user.save();
       return res.status(200).json({
@@ -587,16 +587,19 @@ export const profile_image_update = async (req: Request, res: Response) => {
     }
     if (req.file) {
       user.profile.profileImage = req.file.filename;
-
       const file_name = "profile.profileImage"
       await deleteImageFile(User, user_req.id, file_name)
-      await user.save();
-      return res.status(200).json({
-        success: true,
-        status: 200,
-        messsage: "Profile Image successfully Update",
-      });
     }
+    else {
+      user.profile.profileImage = user.profile.profileImage
+    }
+
+    await user.save();
+    return res.status(200).json({
+      success: true,
+      status: 200,
+      messsage: "Profile Image successfully Update",
+    });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
