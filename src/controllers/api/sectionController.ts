@@ -147,13 +147,24 @@ export const getSections = async (req: Request, res: Response) => {
           section_name: { $first: "$section_name" },
           section_image: { $first: "$section_image" },
           modules: { $push: "$modules" },
-          totalLessons: { $first: "$totalLessons" },
-          completedLessonsInSection: { $first: "$completedLessonsInSection" },
-          completionPercentage: { $first: "$completionPercentage" },
+          totalLessons: { $sum: "$totalLessons" },  // Sum all lessons in the section
+          completedLessonsInSection: { $sum: "$completedLessonsInSection" },  // Sum all completed lessons in the section
         },
       },
       {
         $addFields: {
+          completionPercentage: {
+            $cond: {
+              if: { $gt: ["$totalLessons", 0] },
+              then: {
+                $multiply: [
+                  { $divide: ["$completedLessonsInSection", "$totalLessons"] },
+                  100
+                ]
+              },
+              else: 0
+            }
+          },
           section_image: {
             $cond: {
               if: { $ifNull: ["$section_image", false] },
@@ -161,12 +172,14 @@ export const getSections = async (req: Request, res: Response) => {
               else: null,
             },
           },
-          completionPercentage: { $round: ["$completionPercentage", 2] },
         },
       },
       {
-        $sort: { _id: 1 },
-      }
+        $addFields: {
+          completionPercentage: { $round: ["$completionPercentage", 2] }
+        },
+      },
+      { $sort: { _id: 1 } }
     ]);
 
     if (!sectionsWithCompletion) {
