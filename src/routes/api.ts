@@ -1,5 +1,5 @@
 import express from "express";
-import { uploadProfileImage } from "../services/uploadImage";
+import { uploadFile, uploadProfileImage } from "../services/uploadImage";
 import { authenticateUser, isAdmin } from "../middlewares/auth";
 
 //==================================== Import Controller ==============================
@@ -11,6 +11,7 @@ import * as quizController from "../controllers/api/quizController";
 import * as scoreController from "../controllers/api/scoreController";
 import * as sectionController from "../controllers/api/sectionController";
 import * as termsAndConditionsController from "../controllers/admin/termsAndConditionsController";
+import * as homeController from "../controllers/api/homeController";
 
 const router = express.Router();
 
@@ -119,6 +120,13 @@ router.get(
 router.get(
   "/terms-and-conditions",
   termsAndConditionsController.getTermsCondition
+);
+
+
+//==================================== Terms and Conditions ==============================
+router.post(
+  "/home-content",
+  uploadFile, homeController.createHome
 );
 
 export default router;
