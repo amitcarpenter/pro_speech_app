@@ -129,4 +129,8 @@ router.post(
   uploadFile, homeController.createHome
 );
 
+router.get(
+  "/get-home-content", homeController.getAllHomes
+);
+
 export default router;

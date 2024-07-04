@@ -30,10 +30,16 @@ export const createHome = async (req: Request, res: Response) => {
 };
 
 // Read operation - Get all homes (GET)
-export const getAllHomes = async (req: Request, res: Response): Promise<void> => {
+export const getAllHomes = async (req: Request, res: Response) => {
     try {
         const homes: IHome[] = await Home.find();
-        res.status(200).json(homes);
+        if (homes) {
+            homes[0].home_video = APP_URL + homes[0].home_video
+        }
+        return res.status(200).json({
+            success: true,
+            status: 200, data: homes[0]
+        });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
