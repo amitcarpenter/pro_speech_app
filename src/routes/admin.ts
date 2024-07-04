@@ -1,5 +1,5 @@
 import express from "express";
-import { upload, uploadModuleImage, uploadSectionImage, uploadFile } from "../services/uploadImage";
+import { upload, uploadModuleImage, uploadSectionImage, uploadFile, uploadMultipleFiles } from "../services/uploadImage";
 import { authenticateUser, isAdmin } from "../middlewares/auth";
 
 //==================================== Import Controller ==============================
@@ -205,7 +205,7 @@ router.post(
   "/file/upload",
   authenticateUser,
   isAdmin,
-  uploadFile,
+  uploadMultipleFiles,
   fileController.uploadFile
 );
 
@@ -213,7 +213,7 @@ router.put(
   "/file/update/:id",
   authenticateUser,
   isAdmin,
-  uploadFile,
+  uploadMultipleFiles,
   fileController.updateFile
 );
 

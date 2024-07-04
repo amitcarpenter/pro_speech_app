@@ -36,11 +36,11 @@ export const uploadFile = async (req: Request, res: Response) => {
             });
         }
 
-        const { file_name } = req.body;
+        const { file_name, lesson_id } = req.body;
         const file_type = req.file.mimetype;
         let file_url = req.file.filename;
 
-        const newFile = new File({ file_name, file_url, file_type });
+        const newFile = new File({ file_name, file_url, file_type ,lesson_id });
 
 
         await newFile.save();

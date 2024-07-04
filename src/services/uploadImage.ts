@@ -16,3 +16,4 @@ export const uploadProfileImage = upload.single('profileImage');
 export const uploadSectionImage = upload.single('section_image');
 export const uploadModuleImage = upload.single('module_image');
 export const uploadFile = upload.single('file');
+export const uploadMultipleFiles = upload.array('file', 50);
