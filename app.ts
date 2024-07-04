@@ -14,6 +14,7 @@ const EXPRESS_SESSION_SECRET = process.env.EXPRESS_SESSION_SECRET as string;
 
 
 app.use('/', express.static(path.join(__dirname, 'src/uploads')));
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'src/views'));
 

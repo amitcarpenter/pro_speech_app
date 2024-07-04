@@ -78,3 +78,28 @@ export const send_otp_on_email = async ({ to, otp }: SendOtpEmailOptions): Promi
         throw new Error('Error sending OTP email');
     }
 };
+
+
+// Send Reset Link for the admin forgot password on email 
+interface SendEmailOptions {
+    to: string;
+    subject: string;
+    html: string;
+}
+
+export const sendEmail = async ({ to, subject, html }: SendEmailOptions): Promise<void> => {
+    const mailOptions = {
+        from: EMAIL_USER,
+        to,
+        subject,
+        html,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Email sent to ${to}`);
+    } catch (error) {
+        console.error('Error sending email:', error);
+        throw new Error('Error sending email');
+    }
+};

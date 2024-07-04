@@ -45,6 +45,21 @@ router.put(
   userControllers.updateUserProfileByAdmin
 );
 
+router.post(
+  "/forgot-password-admin",
+  userControllers.forgot_password_for_admin
+);
+
+router.get(
+  "/reset-password",
+  userControllers.render_forgot_password_page
+);
+
+router.post(
+  "/reset-password",
+  userControllers.reset_password
+);
+
 //==================================== Section ==============================
 router.post(
   "/sections",

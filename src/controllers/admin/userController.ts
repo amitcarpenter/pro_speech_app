@@ -7,8 +7,13 @@ import Lesson from "../../models/Lesson";
 import Score from "../../models/Score";
 import Joi from "joi";
 import { deleteImageFile } from "../../services/deleteImages";
+import crypto from 'crypto';
+import { sendEmail } from "../../services/otpService";
+import bcrypt from 'bcryptjs';
+
 
 const APP_URL = process.env.APP_URL as string;
+const FRONTEND_URL = process.env.FRONTEND_URL as string;
 
 // Get User List
 export const get_user_list = async (req: Request, res: Response) => {
@@ -293,4 +298,126 @@ export const updateUserProfileByAdmin = async (req: Request, res: Response) => {
       error: error.message,
     });
   }
-};  
+};
+
+// forgot_password_for_admin
+export const forgot_password_for_admin = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    console.log(req.body)
+    const admin = await User.findOne({ email, role: "admin" });
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        status: 404,
+        error: 'Admin not found',
+      });
+    }
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpiry = Date.now() + 3600000;
+    admin.resetPasswordToken = resetToken;
+    admin.resetPasswordExpiry = resetTokenExpiry;
+    await admin.save();
+    const resetLink = `${req.protocol}://${req.get('host')}/api/admin/reset-password?token=${resetToken}`;
+    const emailOptions = {
+      to: email,
+      subject: 'Password Reset Request',
+      html: `
+              <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                  <h2>Password Reset Request</h2>
+                  <p>Click the link below to reset your password:</p>
+                  <a href="${resetLink}" style="color: #1a73e8;">Reset Password</a>
+                  <p>This link will expire in 1 hour.</p>
+              </div>
+          `,
+    };
+    await sendEmail(emailOptions);
+    return res.status(200).json({
+      success: true,
+      status: 200,
+      message: 'Password reset link sent to your email',
+    });
+  } catch (error: any) {
+    console.error('Error in forgot password controller:', error);
+    return res.status(500).json({
+      success: false,
+      status: 500,
+      error: error.message,
+    });
+  }
+};
+
+// Show forgot password page
+export const render_forgot_password_page = (req: Request, res: Response) => {
+  try {
+    return res.render('resetPassword.ejs');
+  } catch (error: any) {
+    console.error('Error rendering forgot password page:', error);
+    res.status(500).send('An error occurred while rendering the page.');
+  }
+};
+
+// reset Password for admin 
+const resetPasswordSchema = Joi.object({
+  token: Joi.string().required(),
+  newPassword: Joi.string().min(8).required().messages({
+    'string.min': 'Password must be at least 8 characters long',
+    'any.required': 'New password is required'
+  })
+});
+
+export const reset_password = async (req: Request, res: Response) => {
+  try {
+    // Validate request body
+    const { error, value } = resetPasswordSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        status: 400,
+        error: error.details[0].message
+      });
+    }
+
+    const { token, newPassword } = value;
+
+    // Find the user by reset token and check if the token has not expired
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpiry: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        status: 400,
+        error: 'Invalid or expired token',
+      });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update the user's password and clear the reset token fields
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpiry = undefined;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      status: 200,
+      message: 'Password reset successfully',
+    });
+  } catch (error: any) {
+    console.error('Error in reset password controller:', error);
+    return res.status(500).json({
+      success: false,
+      status: 500,
+      error: error.message,
+    });
+  }
+};
+
+
+

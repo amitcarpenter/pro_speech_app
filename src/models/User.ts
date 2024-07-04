@@ -33,6 +33,9 @@ export interface IUser extends Document {
   };
 
 
+  resetPasswordToken: string | any;
+  resetPasswordExpiry: string | any;
+
 }
 
 const UserSchema: Schema = new Schema({
@@ -65,7 +68,10 @@ const UserSchema: Schema = new Schema({
     phone: { type: String },
     gender: { type: String },
   },
-
+  
+  resetPasswordToken: { type: String },
+  resetPasswordExpiry: { type: Date },
 });
+
 
 export default mongoose.model<IUser>('User', UserSchema);
