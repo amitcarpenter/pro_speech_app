@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import path from 'path';
 const EMAIL_USER = process.env.EMAIL_USER
 const EMAIL_PASS = process.env.EMAIL_PASS
 
@@ -26,13 +27,47 @@ const transporter = nodemailer.createTransport({
 
 
 // send email 
+// export const send_otp_on_email = async ({ to, otp }: SendOtpEmailOptions): Promise<void> => {
+//     const mailOptions = {
+//         from: EMAIL_USER,
+//         to,
+//         subject: 'Your Verification OTP Code',
+//         text: `Your OTP code is ${otp}. .`,
+//         html: `<p>Your OTP code is <b>${otp}</b>.</p>`
+//     };
+
+//     try {
+//         await transporter.sendMail(mailOptions);
+//         console.log(`OTP email sent to ${to}`);
+//     } catch (error) {
+//         console.error('Error sending OTP email:', error);
+//         throw new Error('Error sending OTP email');
+//     }
+// };
+
+
 export const send_otp_on_email = async ({ to, otp }: SendOtpEmailOptions): Promise<void> => {
+    const logoPath = path.resolve(__dirname, '../assets/logo.png');
+    console.log(logoPath)
     const mailOptions = {
         from: EMAIL_USER,
         to,
-        subject: 'Your Verification OTP Code',
-        text: `Your OTP code is ${otp}. .`,
-        html: `<p>Your OTP code is <b>${otp}</b>.</p>`
+        subject: 'OTP Verification',
+        text: `Your OTP code is ${otp}.`,
+        html: `
+            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <h2>OTP Verification</h2>
+                <p>Your OTP code is <b>${otp}</b>.</p>
+                <img src="cid:unique@cid" alt="Your Image" style="max-width: 100%; height: auto;">
+            </div>
+        `,
+        attachments: [
+            {
+                filename: 'logo.png',
+                path: logoPath,
+                cid: 'unique@cid'
+            }
+        ]
     };
 
     try {

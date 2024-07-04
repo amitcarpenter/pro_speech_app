@@ -65,13 +65,13 @@ export const register = async (req: Request, res: Response) => {
 
     await newUser.save();
 
-    res.status(201).json({
+    await send_otp_on_email({ to: email, otp });
+    return res.status(201).json({
       success: true,
       status: 201,
       message: "User registered successfully. Please verify your account.",
       otp: otp,
     });
-    await send_otp_on_email({ to: email, otp });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
@@ -165,13 +165,13 @@ export const resendOTPByEmail = async (req: Request, res: Response) => {
       { otp: otp, otpExpires: otpExpires },
       { new: true, upsert: true }
     );
-    res.status(200).json({
+    await send_otp_on_email({ to: email, otp });
+    return res.status(200).json({
       success: true,
       status: 200,
       message: "OTP resent successfully",
       otp: otp,
     });
-    await send_otp_on_email({ to: email, otp });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
@@ -200,13 +200,13 @@ export const resendOTPByEmailForResetPassword = async (req: Request, res: Respon
       { resetPasswordOTP: otp, resetPasswordOTPExpires: otpExpires },
       { new: true, upsert: true }
     );
-    res.status(200).json({
+    await send_otp_on_email({ to: email, otp });
+    return res.status(200).json({
       success: true,
       status: 200,
       message: "OTP resent successfully",
       otp: otp,
     });
-    await send_otp_on_email({ to: email, otp });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
@@ -214,7 +214,7 @@ export const resendOTPByEmailForResetPassword = async (req: Request, res: Respon
       error: error.message,
     });
   }
-};  
+};
 
 // Login controller
 export const login = async (req: Request, res: Response) => {
@@ -421,13 +421,13 @@ export const forgotPassword = async (req: Request, res: Response) => {
     user.resetPasswordOTPExpires = new Date(Date.now() + 10 * 60 * 1000);
     await user.save();
 
-    res.status(200).json({
+    await send_otp_on_email({ to: email, otp });
+    return res.status(200).json({
       success: true,
       status: 200,
       message: "OTP sent successfully",
       otp: otp,
     });
-    await send_otp_on_email({ to: email, otp });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
