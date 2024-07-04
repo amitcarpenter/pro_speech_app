@@ -66,8 +66,11 @@ export const get_user_details = async (req: Request, res: Response) => {
         message: 'User Not Found',
       });
     }
-    if (userData.profile.profileImage) {
-      userData.profile.profileImage = APP_URL + userData.profile.profileImage
+    if (
+      userData.profile.profileImage &&
+      !userData.profile.profileImage.startsWith("http")
+    ) {
+      userData.profile.profileImage = APP_URL + userData.profile.profileImage;
     }
 
     // Section Information
@@ -231,8 +234,6 @@ export const updateUserProfileByAdmin = async (req: Request, res: Response) => {
       phone: Joi.string().min(10).max(15).optional(),
     });
 
-
-
     const { error } = updateProfileSchema.validate(req.body);
     if (error) {
       return res.status(400).json({
@@ -263,13 +264,13 @@ export const updateUserProfileByAdmin = async (req: Request, res: Response) => {
         const file_name = "profile.profileImage"
         await deleteImageFile(User, id, file_name)
       } else {
-        if (
-          user.profile.profileImage &&
-          !user.profile.profileImage.startsWith("http")
-        ) {
-          user.profile.profileImage = APP_URL + user.profile.profileImage;
-        }
-        // user.profile.profileImage = user.profile.profileImage
+        // if (
+        //   user.profile.profileImage &&
+        //   !user.profile.profileImage.startsWith("http")
+        // ) {
+        //   user.profile.profileImage = APP_URL + user.profile.profileImage;
+        // }
+        user.profile.profileImage = user.profile.profileImage
       }
 
       await user.save();
