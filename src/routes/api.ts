@@ -19,6 +19,7 @@ router.post("/auth/register", userControllers.register);
 router.post("/auth/verify-otp", userControllers.verifyOTP);
 router.post("/auth/login", userControllers.login);
 router.post("/auth/resend-otp", userControllers.resendOTPByEmail);
+router.post("/auth/resend-reset-otp", userControllers.resendOTPByEmailForResetPassword);
 router.post("/auth/signup/google", userControllers.signup_google);
 router.post("/auth/signup/facebook", userControllers.signup_facebook);
 router.get("/auth/isPassword", authenticateUser, userControllers.isPassword);

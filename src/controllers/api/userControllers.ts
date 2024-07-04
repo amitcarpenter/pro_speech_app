@@ -181,6 +181,41 @@ export const resendOTPByEmail = async (req: Request, res: Response) => {
   }
 };
 
+// resend otp for reset password
+export const resendOTPByEmailForResetPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        status: 400,
+        message: "Email Not Valid",
+      });
+    }
+
+    const otp = generateOTP();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+    const user = await User.findOneAndUpdate(
+      { email: email },
+      { resetPasswordOTP: otp, resetPasswordOTPExpires: otpExpires },
+      { new: true, upsert: true }
+    );
+    res.status(200).json({
+      success: true,
+      status: 200,
+      message: "OTP resent successfully",
+      otp: otp,
+    });
+    await send_otp_on_email({ to: email, otp });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      status: 500,
+      error: error.message,
+    });
+  }
+};  
+
 // Login controller
 export const login = async (req: Request, res: Response) => {
   try {
