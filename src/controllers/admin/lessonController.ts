@@ -31,10 +31,11 @@ export const createLesson = async (req: Request, res: Response) => {
     // const lessonsData = req.body;
     // const savedLessons = [];
     // for (const lessonData of lessonsData) {
-    const { lesson_name, module_id } = req.body;
+    const { lesson_name, module_id, lessonDetails } = req.body;
     const newLesson = new Lesson({
       lesson_name,
       module_id,
+      lessonDetails
     });
     const savedLesson = await newLesson.save();
     // savedLessons.push(savedLesson);

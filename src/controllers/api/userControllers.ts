@@ -306,10 +306,12 @@ export const getProfile = async (req: Request, res: Response) => {
       user.profile.profileImage = APP_URL + user.profile.profileImage;
     }
 
+
     return res.status(200).json({
       success: true,
       status: 200,
       profile: user.profile,
+      userId: user?._id
     });
   } catch (error: any) {
     return res.status(500).json({
