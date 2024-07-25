@@ -7,3 +7,13 @@ export const handleError = (res: Response, statusCode: number, message: string) 
     error: message
   });
 };
+
+
+export const sendResponse = (res: Response, status: number, success: boolean, message: string, data: any = null) => {
+  res.status(status).json({
+    success,
+    status,
+    message,
+    data
+  });
+};

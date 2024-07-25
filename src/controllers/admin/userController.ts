@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import User, { IUser } from "../../models/User";
 import { Types } from "mongoose";
 import Section from "../../models/Section";
-import { handleError } from "../../utils/errorHandle";
+import { handleError } from "../../utils/responseHandle";
 import Lesson from "../../models/Lesson";
 import Score from "../../models/Score";
 import Joi from "joi";

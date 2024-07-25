@@ -1,5 +1,5 @@
 import express from "express";
-import { upload, uploadModuleImage, uploadSectionImage, uploadFile, uploadMultipleFiles } from "../services/uploadImage";
+import { upload, upload_question, uploadModuleImage, uploadSectionImage, uploadFile, uploadMultipleFiles } from "../services/uploadImage";
 import { authenticateUser, isAdmin } from "../middlewares/auth";
 
 //==================================== Import Controller ==============================
@@ -63,8 +63,8 @@ router.post(
 //==================================== Section ==============================
 router.post(
   "/sections",
-  authenticateUser,
-  isAdmin,
+  // authenticateUser,
+  // isAdmin,
   uploadSectionImage,
   sectionController.createSection
 );
@@ -132,85 +132,34 @@ router.delete(
 );
 
 //==================================== Quiz ==============================
-router.post("/quizzes", authenticateUser, isAdmin, quizController.createQuiz);
-router.put(
-  "/quizzes/:id",
-  authenticateUser,
-  isAdmin,
-  quizController.updateQuizById
-);
-router.put(
-  "/quizzes/:id",
-  authenticateUser,
-  isAdmin,
-  quizController.updateQuizById
-);
-router.delete(
-  "/quizzes/:id",
-  authenticateUser,
-  isAdmin,
-  quizController.deleteQuizById
-);
+router.post("/quizzes", authenticateUser, isAdmin, upload.any(), quizController.createQuiz);
+router.put("/quizzes/:id", authenticateUser, isAdmin, quizController.updateQuizById);
+router.put("/quizzes/:id", authenticateUser, isAdmin, quizController.updateQuizById);
+router.delete("/quizzes/:id", authenticateUser, isAdmin, quizController.deleteQuizById);
+router.delete("/quizzes/:quizId/questions/:questionId", quizController.deleteQuestionById);
+router.put('/quizzes/:quizId/questions/:questionId', upload_question, quizController.updateQuestionById);
+router.post('/quizzes/:quizId/questions', upload_question, quizController.createQuestion);
+
 
 //==================================== Privacy Policy ==============================
-router.post(
-  "/privacy-policy/create",
-  authenticateUser,
-  isAdmin,
-  privacyPoliciesController.createPrivacyPolicy
-);
-router.put(
-  "/privacy-policy/",
-  authenticateUser,
-  isAdmin,
-  privacyPoliciesController.updatePrivacyPolicy
-);
-router.delete(
-  "/privacy-policy/:id",
-  authenticateUser,
-  isAdmin,
-  privacyPoliciesController.deletePrivacyPolicy
-);
+router.post("/privacy-policy/create", authenticateUser, isAdmin, privacyPoliciesController.createPrivacyPolicy);
+router.put("/privacy-policy/", authenticateUser, isAdmin, privacyPoliciesController.updatePrivacyPolicy);
+router.delete("/privacy-policy/:id", authenticateUser, isAdmin, privacyPoliciesController.deletePrivacyPolicy);
 
 //==================================== Terms & Condition ==============================
-router.post(
-  "/terms-and-conditions/create",
-  authenticateUser,
-  isAdmin,
-  termsAndConditionsController.createTermsCondition
-);
-router.put(
-  "/terms-and-conditions/",
-  authenticateUser,
-  isAdmin,
-  termsAndConditionsController.updateTermsCondition
-);
-router.delete(
-  "/terms-and-conditions/:id",
-  authenticateUser,
-  isAdmin,
-  termsAndConditionsController.deleteTermsCondition
-);
+router.post("/terms-and-conditions/create", authenticateUser, isAdmin, termsAndConditionsController.createTermsCondition);
+router.put("/terms-and-conditions/", authenticateUser, isAdmin, termsAndConditionsController.updateTermsCondition);
+router.delete("/terms-and-conditions/:id", authenticateUser, isAdmin, termsAndConditionsController.deleteTermsCondition);
 
 //==================================== Terms & Condition ==============================
-router.get(
-  "/sidebar",
-  authenticateUser,
-  isAdmin,
-  sectionController.sidebarshow
+router.get("/sidebar", authenticateUser, isAdmin, sectionController.sidebarshow
 );
 
 //==================================== File Upload System ==============================
-router.post(
-  "/file/upload",
-  authenticateUser,
-  isAdmin,
-  uploadMultipleFiles,
-  fileController.uploadFile
+router.post("/file/upload", authenticateUser, isAdmin, uploadMultipleFiles, fileController.uploadFile
 );
 
-router.put(
-  "/file/update/:id",
+router.put("/file/update/:id",
   authenticateUser,
   isAdmin,
   uploadMultipleFiles,
