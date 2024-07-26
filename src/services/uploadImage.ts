@@ -31,7 +31,7 @@ export const upload_question = multer({
 
 // Check file type
 function checkFileType(file: Express.Multer.File, cb: multer.FileFilterCallback) {
-    const filetypes = /jpeg|jpg|png|gif/;
+    const filetypes = /./; 
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = filetypes.test(file.mimetype);
 

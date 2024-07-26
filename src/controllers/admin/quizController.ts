@@ -254,8 +254,15 @@ export const updateQuestionById = async (req: Request, res: Response) => {
 
             if (correctOptionFile) {
                 question.correctOption = `${correctOptionFile.filename}`;
+                console.log("image 111111111111111111111")
             } else if (correctOption) {
-                question.correctOption = correctOption;
+                if (typeof correctOption === 'string' && (correctOption.startsWith('http') || correctOption.startsWith('https'))) {
+                    console.log("2222222222222222222222222")
+                    const correctOption1 = correctOption.replace(APP_URL, '');
+                    question.correctOption = correctOption1;
+                } else {
+                    question.correctOption = correctOption;
+                }
             }
         }
 
