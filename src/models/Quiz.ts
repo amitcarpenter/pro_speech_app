@@ -2,6 +2,7 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 interface IQuestion {
+  id?: any | "",
   _id?: any | "",
   text: any;
   options: any[];

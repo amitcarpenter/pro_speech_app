@@ -1,9 +1,10 @@
-import { Request, Response } from 'express';
 import Joi from 'joi';
 import Quiz from '../../models/Quiz';
+import { Request, Response } from 'express';
 import { sendResponse } from "../../utils/responseHandle"
+import mongoose, { Document, Schema, model, Types } from 'mongoose';
 
-
+const APP_URL = process.env.APP_URL as string
 
 interface MulterRequest extends Request {
     files: {
@@ -16,6 +17,32 @@ interface ICreateQuestion {
     options: string[];
     correctOption: string;
 }
+
+interface IQuestion extends Document {
+    _id: mongoose.Types.ObjectId;
+    text: string;
+    options: string[];
+    correctOption: string;
+}
+
+interface IQuiz extends Document {
+    quiz_name: string;
+    questions: IQuestion[];
+    lesson_id: Types.ObjectId;
+}
+
+interface IQuestion extends Document {
+    text: string;
+    options: string[];
+    correctOption: string;
+}
+
+type ProcessedQuestion = {
+    _id: mongoose.Types.ObjectId;
+    text: string;
+    options: string[];
+    correctOption: string;
+};
 
 
 //==================================== Controller for ADMIN side ==============================
@@ -181,15 +208,27 @@ export const deleteQuestionById = async (req: Request, res: Response) => {
 
 // update question by  quiz id and question id
 export const updateQuestionById = async (req: Request, res: Response) => {
-    const { quizId, questionId } = req.params;
-    const { text, correctOptionText, options: textOptions } = req.body;
+    const update_question = Joi.object({
+        options: Joi.array().items(Joi.string().required()).optional(),
+        text: Joi.string().optional(),
+        correctOption: Joi.string().optional().allow(""),
+    });
 
+    const { error } = update_question.validate(req.body);
+    if (error) {
+        return res.status(400).json({
+            success: false,
+            status: 400,
+            message: error.details[0].message,
+        });
+    }
+    const { quizId, questionId } = req.params;
+    const { text, correctOption, options: textOptions } = req.body;
     try {
         const quiz = await Quiz.findById(quizId);
         if (!quiz) {
             return sendResponse(res, 404, false, "Quiz not found");
         }
-
         const questionIndex = quiz.questions.findIndex(
             (question) => question._id.toString() === questionId
         );
@@ -197,15 +236,11 @@ export const updateQuestionById = async (req: Request, res: Response) => {
         if (questionIndex === -1) {
             return sendResponse(res, 404, false, "Question not found");
         }
-
         const question = quiz.questions[questionIndex];
-
         if (text) {
             question.text = text;
         }
-
         const options: string[] = [];
-
         if ((req as MulterRequest).files) {
             const files = (req as MulterRequest).files;
             const optionsFiles = files['options'];
@@ -219,37 +254,61 @@ export const updateQuestionById = async (req: Request, res: Response) => {
 
             if (correctOptionFile) {
                 question.correctOption = `${correctOptionFile.filename}`;
-            } else if (correctOptionText) {
-                question.correctOption = correctOptionText;
+            } else if (correctOption) {
+                question.correctOption = correctOption;
             }
         }
 
         if (textOptions) {
             if (typeof textOptions === 'string') {
-                options.push(textOptions);
+                if (textOptions.startsWith('http') || textOptions.startsWith('https')) {
+                    const replacedOption = textOptions.replace(APP_URL, '');
+                    options.push(replacedOption);
+                } else {
+                    options.push(textOptions);
+                }
             } else if (Array.isArray(textOptions)) {
-                options.push(...textOptions);
+                textOptions.forEach((option) => {
+                    if (option.startsWith('http') || option.startsWith('https')) {
+                        const replacedOption = option.replace(APP_URL, '');
+                        options.push(replacedOption);
+                    } else {
+                        options.push(option);
+                    }
+                });
             }
         }
-
         question.options = options;
-
-        // Save the updated quiz
         await quiz.save();
-
-        sendResponse(res, 200, true, "Question updated successfully", question);
+        return sendResponse(res, 200, true, "Question updated successfully", question);
     } catch (error) {
-        sendResponse(res, 500, false, "Server error", error);
+        return sendResponse(res, 500, false, "Server error", error);
     }
 };
 
 // Create question by quiz id
 export const createQuestion = async (req: Request, res: Response) => {
-    const { quizId } = req.params;
-    let { text, correctOptionText, options: textOptions } = req.body;
+    const create_question = Joi.object({
+        options: Joi.array().items(Joi.string().required()).optional(),
+        text: Joi.string().optional(),
+        correctOption: Joi.string().optional().allow(""),
+    });
+
+    const { error } = create_question.validate(req.body);
+    if (error) {
+        return res.status(400).json({
+            success: false,
+            status: 400,
+            message: error.details[0].message,
+        });
+    }
+
+    const { lessonId } = req.params;
+
+    let { text, correctOption, options: textOptions } = req.body;
 
     try {
-        const quiz = await Quiz.findById(quizId);
+        const quiz = await Quiz.findOne({ lesson_id: lessonId });
         if (!quiz) {
             return sendResponse(res, 404, false, "Quiz not found");
         }
@@ -267,7 +326,7 @@ export const createQuestion = async (req: Request, res: Response) => {
                 });
             }
             if (correctOptionFile) {
-                correctOptionText = correctOptionFile.filename;
+                correctOption = correctOptionFile.filename;
             }
         }
         if (textOptions) {
@@ -278,17 +337,82 @@ export const createQuestion = async (req: Request, res: Response) => {
             }
         }
 
+        // Ensure text and correctOption are provided
+        if (!text) {
+            return sendResponse(res, 400, false, "Text is required");
+        }
+        if (!correctOption) {
+            return sendResponse(res, 400, false, "Correct option is required");
+        }
+
         const newQuestion: ICreateQuestion = {
             text,
             options,
-            correctOption: correctOptionText
+            correctOption: correctOption
         };
 
         quiz.questions.push(newQuestion);
         await quiz.save();
 
-        sendResponse(res, 201, true, "Question created successfully", newQuestion);
+        return sendResponse(res, 201, true, "Question created successfully", newQuestion);
     } catch (error) {
-        sendResponse(res, 500, false, "Server error", error);
+        return sendResponse(res, 500, false, "Server error", error);
+    }
+};
+
+// Get question by quiz id and question id
+export const getQuestionById = async (req: Request, res: Response) => {
+    const { quizId, questionId } = req.params;
+    try {
+        const quiz = await Quiz.findById(quizId);
+        if (!quiz) {
+            return sendResponse(res, 404, false, "Quiz not found");
+        }
+        const question = (quiz as IQuiz).questions.find(q => q._id.toString() === questionId);
+        if (!question) {
+            return sendResponse(res, 404, false, "Question not found");
+        } const questionWithBaseUrl = {
+            _id: question._id,
+            text: question.text,
+            options: question.options.map((option: string) =>
+                option.includes('.') ? `${APP_URL}${option}` : option
+            ),
+            correctOption: question.correctOption.includes('.')
+                ? `${APP_URL}${question.correctOption}`
+                : question.correctOption
+        };
+
+        return sendResponse(res, 200, true, "Question retrieved successfully", questionWithBaseUrl);
+    } catch (error) {
+        console.error('Error in getQuestionById:', error);
+        return sendResponse(res, 500, false, "Server error", { message: (error as Error).message });
+    }
+};
+
+// Get all questin by quiz id 
+export const getAllQuestionsByQuizId = async (req: Request, res: Response) => {
+    const { quizId } = req.params;
+    try {
+        const quiz = await Quiz.findById(quizId);
+        if (!quiz) {
+            return sendResponse(res, 404, false, "Quiz not found");
+        }
+        const processedQuestions: ProcessedQuestion[] = (quiz as IQuiz).questions.map((question: IQuestion) => {
+            return {
+                _id: question._id,
+                text: question.text,
+                options: question.options.map(option =>
+                    typeof option === 'string' && option.includes('.') ? `${APP_URL}${option}` : option
+                ),
+                correctOption: typeof question.correctOption === 'string' && question.correctOption.includes('.')
+                    ? `${APP_URL}${question.correctOption}`
+                    : question.correctOption
+            };
+        });
+
+        sendResponse(res, 200, true, "Questions retrieved successfully", processedQuestions);
+    } catch (error) {
+        console.error('Error in getAllQuestionsByQuizId:', error);
+        sendResponse(res, 500, false, "Server error", { message: (error as Error).message });
     }
 };

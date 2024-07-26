@@ -16,129 +16,40 @@ import * as termsAndConditionsController from "../controllers/admin/termsAndCond
 const router = express.Router();
 
 //==================================== User ==============================
-router.get(
-  "/get-user-list",
-  authenticateUser,
-  isAdmin,
-  userControllers.get_user_list
-);
-
-router.get(
-  "/get-user-details/:id",
-  authenticateUser,
-  isAdmin,
-  userControllers.get_user_details
-);
-
-router.delete(
-  "/delete-user-by-id/:id",
-  authenticateUser,
-  isAdmin,
-  userControllers.delete_user_by_id
-);
-
-router.put(
-  "/edit-user-profile/:id",
-  authenticateUser,
-  isAdmin,
-  upload.single("profileImage"),
-  userControllers.updateUserProfileByAdmin
-);
-
-router.post(
-  "/forgot-password-admin",
-  userControllers.forgot_password_for_admin
-);
-
-router.get(
-  "/reset-password",
-  userControllers.render_forgot_password_page
-);
-
-router.post(
-  "/reset-password",
-  userControllers.reset_password
-);
+router.get("/get-user-list", authenticateUser, isAdmin, userControllers.get_user_list);
+router.get("/get-user-details/:id", authenticateUser, isAdmin, userControllers.get_user_details);
+router.delete("/delete-user-by-id/:id", authenticateUser, isAdmin, userControllers.delete_user_by_id);
+router.put("/edit-user-profile/:id", authenticateUser, isAdmin, upload.single("profileImage"), userControllers.updateUserProfileByAdmin);
+router.post("/forgot-password-admin", userControllers.forgot_password_for_admin);
+router.get("/reset-password", userControllers.render_forgot_password_page);
+router.post("/reset-password", userControllers.reset_password);
 
 //==================================== Section ==============================
-router.post(
-  "/sections",
-  // authenticateUser,
-  // isAdmin,
-  uploadSectionImage,
-  sectionController.createSection
-);
-router.put(
-  "/sections/:id",
-  authenticateUser,
-  isAdmin,
-  uploadSectionImage,
-  sectionController.updateSection
-);
-router.delete(
-  "/sections/:id",
-  authenticateUser,
-  isAdmin,
-  sectionController.deleteSection
-);
-
-router.get(
-  "/sections-all",
-  authenticateUser,
-  isAdmin,
-  sectionController.getSectionsForAdmin
-);
+router.post("/sections", authenticateUser, isAdmin, uploadSectionImage, sectionController.createSection);
+router.put("/sections/:id", authenticateUser, isAdmin, uploadSectionImage, sectionController.updateSection);
+router.delete("/sections/:id", authenticateUser, isAdmin, sectionController.deleteSection);
+router.get("/sections-all", authenticateUser, isAdmin, sectionController.getSectionsForAdmin);
 
 //==================================== Module ==============================
-router.post(
-  "/modules",
-  authenticateUser,
-  isAdmin,
-  uploadModuleImage,
-  moduleController.createModule
-);
-router.put(
-  "/modules/:id",
-  authenticateUser,
-  isAdmin,
-  uploadModuleImage,
-  moduleController.updateModuleById
-);
-router.delete(
-  "/modules/:id",
-  authenticateUser,
-  isAdmin,
-  moduleController.deleteModuleById
-);
+router.post("/modules", authenticateUser, isAdmin, uploadModuleImage, moduleController.createModule);
+router.put("/modules/:id", authenticateUser, isAdmin, uploadModuleImage, moduleController.updateModuleById);
+router.delete("/modules/:id", authenticateUser, isAdmin, moduleController.deleteModuleById);
 
 //==================================== Lesson ==============================
-router.post(
-  "/lessons",
-  authenticateUser,
-  isAdmin,
-  lessonController.createLesson
-);
-router.put(
-  "/lessons/:id",
-  authenticateUser,
-  isAdmin,
-  lessonController.updateLessonById
-);
-router.delete(
-  "/lessons/:id",
-  authenticateUser,
-  isAdmin,
-  lessonController.deleteLessonById
-);
+router.post("/lessons", authenticateUser, isAdmin, lessonController.createLesson);
+router.put("/lessons/:id", authenticateUser, isAdmin, lessonController.updateLessonById);
+router.delete("/lessons/:id", authenticateUser, isAdmin, lessonController.deleteLessonById);
 
-//==================================== Quiz ==============================
+//==================================== Quiz ============================
 router.post("/quizzes", authenticateUser, isAdmin, upload.any(), quizController.createQuiz);
 router.put("/quizzes/:id", authenticateUser, isAdmin, quizController.updateQuizById);
 router.put("/quizzes/:id", authenticateUser, isAdmin, quizController.updateQuizById);
 router.delete("/quizzes/:id", authenticateUser, isAdmin, quizController.deleteQuizById);
 router.delete("/quizzes/:quizId/questions/:questionId", quizController.deleteQuestionById);
 router.put('/quizzes/:quizId/questions/:questionId', upload_question, quizController.updateQuestionById);
-router.post('/quizzes/:quizId/questions', upload_question, quizController.createQuestion);
+router.post('/quizzes/:lessonId/questions', upload_question, quizController.createQuestion);
+router.get('/quizzes/:quizId/questions/:questionId', quizController.getQuestionById);
+router.get('/quizzes/:quizId/questions/all', quizController.getAllQuestionsByQuizId);
 
 
 //==================================== Privacy Policy ==============================
@@ -152,39 +63,13 @@ router.put("/terms-and-conditions/", authenticateUser, isAdmin, termsAndConditio
 router.delete("/terms-and-conditions/:id", authenticateUser, isAdmin, termsAndConditionsController.deleteTermsCondition);
 
 //==================================== Terms & Condition ==============================
-router.get("/sidebar", authenticateUser, isAdmin, sectionController.sidebarshow
-);
+router.get("/sidebar", authenticateUser, isAdmin, sectionController.sidebarshow);
 
 //==================================== File Upload System ==============================
-router.post("/file/upload", authenticateUser, isAdmin, uploadMultipleFiles, fileController.uploadFile
-);
-
-router.put("/file/update/:id",
-  authenticateUser,
-  isAdmin,
-  uploadMultipleFiles,
-  fileController.updateFile
-);
-
-router.get(
-  "/file/get/:id",
-  authenticateUser,
-  isAdmin,
-  fileController.getFileById
-);
-
-router.get(
-  "/file/get-all",
-  authenticateUser,
-  isAdmin,
-  fileController.getAllFiles
-);
-
-router.delete(
-  "/file/delete/:id",
-  authenticateUser,
-  isAdmin,
-  fileController.deleteFile
-);
+router.post("/file/upload", authenticateUser, isAdmin, uploadMultipleFiles, fileController.uploadFile);
+router.put("/file/update/:id", authenticateUser, isAdmin, uploadMultipleFiles, fileController.updateFile);
+router.get("/file/get/:id", authenticateUser, isAdmin, fileController.getFileById);
+router.get("/file/get-all", authenticateUser, isAdmin, fileController.getAllFiles);
+router.delete("/file/delete/:id", authenticateUser, isAdmin, fileController.deleteFile);
 
 export default router;

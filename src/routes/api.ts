@@ -25,112 +25,46 @@ router.post("/auth/signup/google", userControllers.signup_google);
 router.post("/auth/signup/facebook", userControllers.signup_facebook);
 router.get("/auth/isPassword", authenticateUser, userControllers.isPassword);
 router.get("/auth/profile", authenticateUser, userControllers.getProfile);
-router.put(
-  "/auth/profile",
-  uploadProfileImage,
-  authenticateUser,
-  userControllers.updateProfile
-);
-router.post(
-  "/auth/profileImage/update",
-  authenticateUser,
-  uploadProfileImage,
-  userControllers.profile_image_update
-);
-router.delete(
-  "/auth/profileImage/delete",
-  authenticateUser,
-  userControllers.remove_profile_image
-);
+router.put("/auth/profile", uploadProfileImage, authenticateUser, userControllers.updateProfile);
+router.post("/auth/profileImage/update", authenticateUser, uploadProfileImage, userControllers.profile_image_update);
+router.delete("/auth/profileImage/delete", authenticateUser, userControllers.remove_profile_image);
 router.post("/auth/forgot-password", userControllers.forgotPassword);
-router.post(
-  "/auth/verify-forgot-password",
-  userControllers.verify_otp_forgot_password
-);
-router.post(
-  "/auth/change-password-by-email",
-  userControllers.changePasswordByEmail
-);
-router.post(
-  "/auth/change-password",
-  authenticateUser,
-  userControllers.changePassword
-);
+router.post("/auth/verify-forgot-password", userControllers.verify_otp_forgot_password);
+router.post("/auth/change-password-by-email", userControllers.changePasswordByEmail);
+router.post("/auth/change-password", authenticateUser, userControllers.changePassword);
 router.delete("/auth/delete-account", authenticateUser, userControllers.deleteAccount);
 
 //=================================== section ==============================
 router.get("/sections", authenticateUser, sectionController.getSections);
 
 //==================================== Modules ==============================
-router.get(
-  "/modules",
-  authenticateUser,
-  authenticateUser,
-  moduleController.getAllModules
-);
-router.get(
-  "/modules/section-id/:id",
-  authenticateUser,
-  moduleController.getModuleBySectionId
-);
+router.get("/modules", authenticateUser, authenticateUser, moduleController.getAllModules);
+router.get("/modules/section-id/:id", authenticateUser, moduleController.getModuleBySectionId);
 
 //==================================== Lesson  ==============================
 router.get("/lessons", authenticateUser, lessonController.getAllLessons);
 router.get("/lessons/:id", authenticateUser, lessonController.getLessonById);
 router.get("/lessons/:id", authenticateUser, lessonController.getLessonById);
-router.get(
-  "/lessons/module-id/:id",
-  authenticateUser,
-  lessonController.getLessonByModuleId
-);
+router.get("/lessons/module-id/:id", authenticateUser, lessonController.getLessonByModuleId);
 
 //==================================== Quiz ==============================
 router.get("/quizzes", authenticateUser, quizController.getAllQuizzes);
 router.get("/quizzes/:id", authenticateUser, quizController.getQuizById);
-router.post(
-  "/quizzes/check-answer",
-  authenticateUser,
-  quizController.check_quiz
-);
-router.get(
-  "/quizzes/lesson-id/:id",
-  authenticateUser,
-  quizController.getQuizByLessonId
-);
-router.post(
-  "/quizzes/submit-quiz",
-  authenticateUser,
-  quizController.submit_quiz
-);
+router.post("/quizzes/check-answer", authenticateUser, quizController.check_quiz);
+router.get("/quizzes/lesson-id/:id", authenticateUser, quizController.getQuizByLessonId);
+router.post("/quizzes/submit-quiz", authenticateUser, quizController.submit_quiz);
 
 //==================================== Score LeaderBoard ==============================
-router.get(
-  "/scores/leaderboard",
-  authenticateUser,
-  scoreController.get_score_leaderboard
-);
+router.get("/scores/leaderboard", authenticateUser, scoreController.get_score_leaderboard);
 
 //==================================== Privacy Policy ==============================
-router.get(
-  "/privacy-policy",
-  privacyPoliciesController.getAllPrivacyPolicies
-);
+router.get("/privacy-policy", privacyPoliciesController.getAllPrivacyPolicies);
 
 //==================================== Terms and Conditions ==============================
-router.get(
-  "/terms-and-conditions",
-  termsAndConditionsController.getTermsCondition
-);
-
+router.get("/terms-and-conditions", termsAndConditionsController.getTermsCondition);
 
 //==================================== Terms and Conditions ==============================
-router.post(
-  "/home-content",
-  uploadFile, homeController.createHome
-);
-
-router.get(
-  "/get-home-content", homeController.getAllHomes
-);
+router.post("/home-content", uploadFile, homeController.createHome);
+router.get("/get-home-content", homeController.getAllHomes);
 
 export default router;
