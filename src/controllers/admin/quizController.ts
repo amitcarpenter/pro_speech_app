@@ -209,7 +209,11 @@ export const deleteQuestionById = async (req: Request, res: Response) => {
 // update question by  quiz id and question id
 export const updateQuestionById = async (req: Request, res: Response) => {
     const update_question = Joi.object({
-        options: Joi.array().items(Joi.string().required()).optional(),
+        // options: Joi.array().items(Joi.string().required()).optional(),
+        options: Joi.alternatives().try(
+            Joi.string().allow(''),
+            Joi.array().items(Joi.string().allow(''))
+          ).optional(),
         text: Joi.string().optional(),
         correctOption: Joi.string().optional().allow(""),
     });
@@ -296,10 +300,16 @@ export const updateQuestionById = async (req: Request, res: Response) => {
 // Create question by quiz id
 export const createQuestion = async (req: Request, res: Response) => {
     const create_question = Joi.object({
-        options: Joi.array().items(Joi.string().required()).optional(),
+        // options: Joi.array().items(Joi.string().required()).optional(),
+        options: Joi.alternatives().try(
+            Joi.string().allow(''),
+            Joi.array().items(Joi.string().allow(''))
+          ).optional(),
         text: Joi.string().optional(),
         correctOption: Joi.string().optional().allow(""),
     });
+
+
 
     const { error } = create_question.validate(req.body);
     if (error) {
