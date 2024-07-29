@@ -181,58 +181,116 @@ interface ILesson {
   completed_by: Types.ObjectId[];
   question_count: number;
 }
+
 // export const getSectionsForAdmin = async (req: Request, res: Response) => {
 //   try {
-//     // Fetch sections and populate modules and lessons
-//     const sections = await Section.find().populate({path: "modules"});
-
 //     const user_req = req.user as IUser;
 //     const user = await User.findById(user_req.id);
 //     const completedLessons = user?.completed_lessons.map((id) => id.toString()) ?? [];
 
-//     if (!sections) {
+//     // Aggregation pipeline
+//     const sectionsWithCompletion = await Section.aggregate([
+//       {
+//         $lookup: {
+//           from: "modules",
+//           localField: "modules",
+//           foreignField: "_id",
+//           as: "modules",
+//         },
+//       },
+//       {
+//         $unwind: "$modules",
+//       },
+//       {
+//         $lookup: {
+//           from: "lessons",
+//           localField: "modules._id",
+//           foreignField: "module_id",
+//           as: "lessons",
+//         },
+//       },
+//       {
+//         $addFields: {
+//           "modules.totalLessons": { $size: "$lessons" },
+//           "modules.completedLessonsInModule": {
+//             $size: {
+//               $filter: {
+//                 input: "$lessons",
+//                 as: "lesson",
+//                 cond: { $in: [{ $toString: "$$lesson._id" }, completedLessons] },
+//               },
+//             },
+//           },
+//         },
+//       },
+//       {
+//         $addFields: {
+//           "modules.completionPercentage": {
+//             $cond: {
+//               if: { $gt: ["$modules.totalLessons", 0] },
+//               then: {
+//                 $multiply: [
+//                   { $divide: ["$modules.completedLessonsInModule", "$modules.totalLessons"] },
+//                   100,
+//                 ],
+//               },
+//               else: 0,
+//             },
+//           },
+//           "modules.module_image": {
+//             $cond: {
+//               if: { $ifNull: ["$modules.module_image", false] },
+//               then: { $concat: [APP_URL, "$modules.module_image"] },
+//               else: null,
+//             },
+//           },
+//         },
+//       },
+//       {
+//         $group: {
+//           _id: "$_id",
+//           section_name: { $first: "$section_name" },
+//           section_image: { $first: "$section_image" },
+//           modules: { $push: "$modules" },
+//         },
+//       },
+//       {
+//         $addFields: {
+//           totalLessons: { $sum: "$modules.totalLessons" },
+//           completedLessonsInSection: { $sum: "$modules.completedLessonsInModule" },
+//         },
+//       },
+//       {
+//         $addFields: {
+//           completionPercentage: {
+//             $cond: {
+//               if: { $gt: ["$totalLessons", 0] },
+//               then: {
+//                 $multiply: [
+//                   { $divide: ["$completedLessonsInSection", "$totalLessons"] },
+//                   100,
+//                 ],
+//               },
+//               else: 0,
+//             },
+//           },
+//           section_image: {
+//             $cond: {
+//               if: { $ifNull: ["$section_image", false] },
+//               then: { $concat: [APP_URL, "$section_image"] },
+//               else: null,
+//             },
+//           },
+//         },
+//       },
+//       {
+//         $sort: { _id: 1 },
+//       },
+//     ]);
+
+//     if (!sectionsWithCompletion.length) {
 //       return res.status(400).json({ success: false, status: 400, message: "Sections not found" });
 //     }
-
-//     const sectionsWithCompletion = await Promise.all(
-//       sections.map(async (section) => {
-//         const moduleIds = section.modules.map((module: { _id: Types.ObjectId }) => module._id);
-
-//         // Fetch lessons related to modules in the section
-//         const lessons = (await Lesson.find({ module_id: { $in: moduleIds } })) as ILesson[];
-//         const totalLessons = lessons.length;
-
-//         // Convert lesson IDs to strings for comparison
-//         const lessonIds = lessons.map((lesson) => lesson._id.toString());
-
-//         // Count completed lessons related to this section
-//         const completedLessonsInSection = lessonIds.filter((lessonId) =>
-//           completedLessons.includes(lessonId)
-//         ).length;
-
-//         // Calculate completion percentage
-//         const completionPercentage = totalLessons > 0 ? (completedLessonsInSection / totalLessons) * 100 : 0;
-
-//         // Format section image URL
-//         if (section.section_image) {
-//           section.section_image = APP_URL + section.section_image;
-//         }
-
-//         // Format module image URLs
-//         const formattedModules = section.modules.map((module: any) => {
-//           if (module.module_image) {
-//             module.module_image = APP_URL + module.module_image;
-//           }
-//           return module;
-//         });
-
-//         return {
-//           ...section.toObject(),
-//           modules: formattedModules,
-//           completionPercentage: completionPercentage.toFixed(2),
-//         };
-//       })
-//     );
 
 //     return res.status(200).json({
 //       success: true,
@@ -244,7 +302,6 @@ interface ILesson {
 //     return res.status(500).json({ success: false, status: 500, error: error.message });
 //   }
 // };
-
 
 
 export const getSectionsForAdmin = async (req: Request, res: Response) => {
@@ -264,7 +321,10 @@ export const getSectionsForAdmin = async (req: Request, res: Response) => {
         },
       },
       {
-        $unwind: "$modules",
+        $unwind: {
+          path: "$modules",
+          preserveNullAndEmptyArrays: true,
+        },
       },
       {
         $lookup: {
