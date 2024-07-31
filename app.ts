@@ -15,13 +15,13 @@ dotenv.config()
 mongodb_connection();
 const app: Application = express();
 
-const sslOptions = {
-  ca: fs.readFileSync("/var/www/html/ssl/ca_bundle.crt"),
-  key: fs.readFileSync("/var/www/html/ssl/private.key"),
-  cert: fs.readFileSync("/var/www/html/ssl/certificate.crt"),
-};
-// Create HTTPS server
-const httpsServer = https.createServer(sslOptions, app);
+// const sslOptions = {
+//   ca: fs.readFileSync("/var/www/html/ssl/ca_bundle.crt"),
+//   key: fs.readFileSync("/var/www/html/ssl/private.key"),
+//   cert: fs.readFileSync("/var/www/html/ssl/certificate.crt"),
+// };
+// // Create HTTPS server
+// const httpsServer = https.createServer(sslOptions, app);
 
 
 app.use('/', express.static(path.join(__dirname, 'src/uploads')));
@@ -37,10 +37,10 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 
-// app.listen(PORT, (): void => {
-//   console.log(`Server is working on ${APP_URL}`);
-// });
-
-httpsServer.listen(PORT, () => {
+app.listen(PORT, (): void => {
   console.log(`Server is working on ${APP_URL}`);
-})
+});
+
+// httpsServer.listen(PORT, () => {
+//   console.log(`Server is working on ${APP_URL}`);
+// })

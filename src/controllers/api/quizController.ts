@@ -26,6 +26,7 @@ interface IQuiz extends Document {
 // Update the IQuestion interface to extend Document
 interface IQuestion extends Document {
     text: string;
+    type?: string;
     options: string[];
     correctOption: string;
 }
@@ -240,6 +241,7 @@ export const getQuizByLessonId = async (req: Request, res: Response) => {
                 return {
                     _id: question._id,
                     text: question.text,
+                    type: question.type,
                     options: question.options.map(option =>
                         typeof option === 'string' && option.includes('.') ? `${APP_URL}${option}` : option
                     ),

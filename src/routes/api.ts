@@ -51,7 +51,7 @@ router.get("/lessons/module-id/:id", authenticateUser, lessonController.getLesso
 router.get("/quizzes", authenticateUser, quizController.getAllQuizzes);
 router.get("/quizzes/:id", authenticateUser, quizController.getQuizById);
 router.post("/quizzes/check-answer", authenticateUser, quizController.check_quiz);
-router.get("/quizzes/lesson-id/:id", authenticateUser, quizController.getQuizByLessonId);
+router.get("/quizzes/lesson-id/:id", quizController.getQuizByLessonId);
 router.post("/quizzes/submit-quiz", authenticateUser, quizController.submit_quiz);
 
 //==================================== Score LeaderBoard ==============================

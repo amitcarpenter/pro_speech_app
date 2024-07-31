@@ -11,23 +11,17 @@ import crypto from 'crypto';
 import { sendEmail } from "../../services/otpService";
 import bcrypt from 'bcryptjs';
 
-
 const APP_URL = process.env.APP_URL as string;
 const FRONTEND_URL = process.env.FRONTEND_URL as string;
 
 // Get User List
 export const get_user_list = async (req: Request, res: Response) => {
   try {
-    // const user_list = await User.find({ role: { $ne: "admin" } });
     const user_list = await User.find({ role: { $ne: "admin" } }).sort({ createdAt: -1 });
-
-
     if (!user_list) {
       return handleError(res, 404, "user list not found");
     }
-
     user_list.map((user) => {
-      // user.profile.profileImage = APP_URL + user.profile.profileImage
       if (
         user.profile.profileImage &&
         !user.profile.profileImage.startsWith("http")

@@ -48,8 +48,8 @@ router.delete("/quizzes/:id", authenticateUser, isAdmin, quizController.deleteQu
 router.delete("/quizzes/:quizId/questions/:questionId", quizController.deleteQuestionById);
 router.put('/quizzes/:quizId/questions/:questionId', upload_question, quizController.updateQuestionById);
 router.post('/quizzes/:lessonId/questions', upload_question, quizController.createQuestion);
-router.get('/quizzes/:quizId/questions/:questionId', quizController.getQuestionById);
-router.get('/quizzes/:quizId/questions/all', quizController.getAllQuestionsByQuizId);
+// router.get('/quizzes/:quizId/questions/:questionId', quizController.getQuestionById);
+// router.get('/quizzes/:quizId/questions/all', quizController.getAllQuestionsByQuizId);
 
 
 //==================================== Privacy Policy ==============================
